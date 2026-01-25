@@ -97,8 +97,8 @@ jobs:
       - name: Test package
         run: npm test || echo "No tests specified"
 
-      - name: Publish to npm
-        run: npm publish
+      - name: Publish to npm with provenance
+        run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
