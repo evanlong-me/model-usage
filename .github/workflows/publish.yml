@@ -5,11 +5,6 @@ on:
     branches:
       - main
   workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version to publish (e.g., 1.7.2)'
-        required: true
-        type: string
 
 jobs:
   publish:
@@ -18,7 +13,7 @@ jobs:
       contents: write
       packages: write
       id-token: write
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -34,79 +29,39 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Determine version type
-        id: version-type
-        run: |
-          # Default version increment
-          VERSION_TYPE="patch"
-          
-          # Get the last tag (if any)
-          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-          
-          # Determine the version increment based on commit messages since last tag
-          if [ -z "$LAST_TAG" ]; then
-            # No previous tags, check all commits
-            COMMIT_RANGE="HEAD"
-          else
-            # Check commits since last tag
-            COMMIT_RANGE="$LAST_TAG..HEAD"
-          fi
-          
-          echo "Analyzing commits since $LAST_TAG..."
-          
-          # Check for breaking changes
-          if git log $COMMIT_RANGE --pretty=%B | grep -q 'BREAKING CHANGE'; then
-            VERSION_TYPE="major"
-            echo "💥 Found BREAKING CHANGE - will bump major version"
-          # Check for new features
-          elif git log $COMMIT_RANGE --pretty=%B | grep -q '^feat'; then
-            VERSION_TYPE="minor"
-            echo "✨ Found new features - will bump minor version"
-          else
-            echo "🔧 Only fixes/improvements found - will bump patch version"
-          fi
-          
-          echo "version-type=$VERSION_TYPE" >> $GITHUB_OUTPUT
-
-      - name: Bump version
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          npm version ${{ steps.version-type.outputs.version-type }} --no-git-tag-version
-
-      - name: Get new version
+      - name: Get package version
         id: package-version
         run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
 
-      - name: Commit version bump
+      - name: Check if version already published
+        id: check-version
         run: |
-          git add package.json
-          git commit -m "Bump version to ${{ steps.package-version.outputs.version }}"
-          git tag -a "v${{ steps.package-version.outputs.version }}" -m "Release v${{ steps.package-version.outputs.version }}"
-          git push origin main
-          git push origin "v${{ steps.package-version.outputs.version }}"
-
-      - name: Create Git tag if needed
-        if: github.event_name == 'workflow_dispatch'
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git tag -a "v${{ steps.package-version.outputs.version }}" -m "Release v${{ steps.package-version.outputs.version }}"
-          git push origin "v${{ steps.package-version.outputs.version }}"
+          PUBLISHED=$(npm view claude-code-usage@${{ steps.package-version.outputs.version }} version 2>/dev/null || echo "")
+          if [ "$PUBLISHED" = "${{ steps.package-version.outputs.version }}" ]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "Version ${{ steps.package-version.outputs.version }} already published, skipping..."
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+            echo "Version ${{ steps.package-version.outputs.version }} not published yet, will publish..."
+          fi
 
       - name: Test package
+        if: steps.check-version.outputs.skip == 'false'
         run: npm test || echo "No tests specified"
 
       - name: Publish to npm (Trusted Publishing)
+        if: steps.check-version.outputs.skip == 'false'
         run: npm publish --provenance --access public
 
       - name: Setup Node.js for GitHub Packages
+        if: steps.check-version.outputs.skip == 'false'
         uses: actions/setup-node@v4
         with:
           node-version: '18'
           registry-url: 'https://npm.pkg.github.com'
 
       - name: Configure package for GitHub Packages
+        if: steps.check-version.outputs.skip == 'false'
         run: |
           cp package.json package.json.backup
           node -e "
@@ -117,43 +72,60 @@ jobs:
           "
 
       - name: Publish to GitHub Packages
+        if: steps.check-version.outputs.skip == 'false'
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ github.token }}
 
       - name: Restore original package.json
+        if: steps.check-version.outputs.skip == 'false'
         run: mv package.json.backup package.json
 
+      - name: Create Git tag
+        if: steps.check-version.outputs.skip == 'false'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git tag -a "v${{ steps.package-version.outputs.version }}" -m "Release v${{ steps.package-version.outputs.version }}" || true
+          git push origin "v${{ steps.package-version.outputs.version }}" || true
+
       - name: Generate changelog
+        if: steps.check-version.outputs.skip == 'false'
         id: changelog
         run: |
           echo "changelog<<EOF" >> $GITHUB_OUTPUT
-          git log --pretty=format:"- %s" $(git describe --tags --abbrev=0 HEAD~1)..HEAD >> $GITHUB_OUTPUT
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "")
+          if [ -n "$PREV_TAG" ]; then
+            git log --pretty=format:"- %s" $PREV_TAG..HEAD >> $GITHUB_OUTPUT
+          else
+            git log --pretty=format:"- %s" -10 >> $GITHUB_OUTPUT
+          fi
           echo "" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
+        if: steps.check-version.outputs.skip == 'false'
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ steps.package-version.outputs.version }}
           name: Release v${{ steps.package-version.outputs.version }}
           body: |
             ## Changes in v${{ steps.package-version.outputs.version }}
-            
+
             ${{ steps.changelog.outputs.changelog }}
-            
+
             ## Installation
-            
+
             ```bash
             # From npm
             npm install -g claude-code-usage
-            
+
             # From GitHub Packages
             npm install -g @evanlong-me/claude-code-usage --registry=https://npm.pkg.github.com
             ```
-            
+
             ## Usage
-            
+
             ```bash
             ccu
             ```
