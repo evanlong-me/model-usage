@@ -1,6 +1,6 @@
 {
   "name": "claude-code-usage",
-  "version": "2.8.4",
+  "version": "2.8.5",
   "description": "A lightweight CLI tool for analyzing Claude Code usage statistics and costs locally",
   "main": "index.js",
   "bin": {
