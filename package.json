@@ -13,12 +13,16 @@
   "keywords": [
     "claude",
     "claude-code",
+    "claude-ai",
+    "anthropic",
+    "ai",
     "usage",
     "statistics",
     "cli",
-    "wrapper",
-    "ai",
-    "anthropic"
+    "cost-tracking",
+    "token-counter",
+    "developer-tools",
+    "api-usage"
   ],
   "author": "Evan Long <mail@evanlong.me>",
   "license": "MIT",
