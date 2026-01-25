@@ -50,7 +50,7 @@ program
 // If no options provided, show usage by default
 if (process.argv.slice(2).length === 0) {
   (async () => {
-    const options = await projectDetector.getProjectAwareOptions({});
+    const options = await projectDetector.getProjectAwareOptions({ sort: 'time', order: 'asc' });
     await showUsage(options);
   })();
 } else {
@@ -86,7 +86,7 @@ async function showUsage(options) {
     }
     
     // Show filter and sort info if applied
-    if (options.time || options.project || (options.sort && options.sort !== 'time') || (options.order && options.order !== 'desc')) {
+    if (options.time || options.project || (options.sort && options.sort !== 'time') || (options.order && options.order !== 'asc')) {
       console.log(chalk.cyan('🔍 Options applied:'));
       if (options.time) {
         console.log(chalk.gray(`  Time: ${options.time}`));
@@ -99,7 +99,7 @@ async function showUsage(options) {
       }
       if (options.sort || options.order) {
         const sortBy = options.sort || 'time';
-        const sortOrder = options.order || 'desc';
+        const sortOrder = options.order || 'asc';
         const sortIcon = sortOrder === 'asc' ? '↑' : '↓';
         console.log(chalk.gray(`  Sort: ${sortBy} ${sortIcon}`));
       }
