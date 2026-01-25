@@ -22,13 +22,10 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22'
 
       - name: Install dependencies
         run: npm ci
-
-      - name: Configure npm for publishing
-        run: npm config set registry https://registry.npmjs.org/
 
       - name: Get version from tag
         id: version
@@ -47,13 +44,16 @@ jobs:
       - name: Test package
         run: npm test || echo "No tests specified"
 
+      - name: Setup npm for Trusted Publishing
+        uses: azu/setup-npm-trusted-publish@v1
+
       - name: Publish to npm (Trusted Publishing)
         run: npm publish --provenance --access public
 
       - name: Setup Node.js for GitHub Packages
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22'
           registry-url: 'https://npm.pkg.github.com'
 
       - name: Configure package for GitHub Packages
