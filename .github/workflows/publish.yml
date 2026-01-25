@@ -97,10 +97,8 @@ jobs:
       - name: Test package
         run: npm test || echo "No tests specified"
 
-      - name: Publish to npm with provenance
+      - name: Publish to npm (Trusted Publishing)
         run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Setup Node.js for GitHub Packages
         uses: actions/setup-node@v4
