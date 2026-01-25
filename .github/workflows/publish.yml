@@ -2,9 +2,8 @@ name: Publish Package and Create Release
 
 on:
   push:
-    branches:
-      - main
-  workflow_dispatch:
+    tags:
+      - 'v*'
 
 jobs:
   publish:
@@ -29,39 +28,33 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Get package version
-        id: package-version
-        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+      - name: Get version from tag
+        id: version
+        run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
 
-      - name: Check if version already published
-        id: check-version
+      - name: Verify package.json version matches tag
         run: |
-          PUBLISHED=$(npm view claude-code-usage@${{ steps.package-version.outputs.version }} version 2>/dev/null || echo "")
-          if [ "$PUBLISHED" = "${{ steps.package-version.outputs.version }}" ]; then
-            echo "skip=true" >> $GITHUB_OUTPUT
-            echo "Version ${{ steps.package-version.outputs.version }} already published, skipping..."
-          else
-            echo "skip=false" >> $GITHUB_OUTPUT
-            echo "Version ${{ steps.package-version.outputs.version }} not published yet, will publish..."
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          TAG_VERSION=${{ steps.version.outputs.version }}
+          if [ "$PKG_VERSION" != "$TAG_VERSION" ]; then
+            echo "❌ Version mismatch: package.json ($PKG_VERSION) != tag ($TAG_VERSION)"
+            exit 1
           fi
+          echo "✅ Version verified: $PKG_VERSION"
 
       - name: Test package
-        if: steps.check-version.outputs.skip == 'false'
         run: npm test || echo "No tests specified"
 
       - name: Publish to npm (Trusted Publishing)
-        if: steps.check-version.outputs.skip == 'false'
         run: npm publish --provenance --access public
 
       - name: Setup Node.js for GitHub Packages
-        if: steps.check-version.outputs.skip == 'false'
         uses: actions/setup-node@v4
         with:
           node-version: '18'
           registry-url: 'https://npm.pkg.github.com'
 
       - name: Configure package for GitHub Packages
-        if: steps.check-version.outputs.skip == 'false'
         run: |
           cp package.json package.json.backup
           node -e "
@@ -72,25 +65,14 @@ jobs:
           "
 
       - name: Publish to GitHub Packages
-        if: steps.check-version.outputs.skip == 'false'
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ github.token }}
 
       - name: Restore original package.json
-        if: steps.check-version.outputs.skip == 'false'
         run: mv package.json.backup package.json
 
-      - name: Create Git tag
-        if: steps.check-version.outputs.skip == 'false'
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git tag -a "v${{ steps.package-version.outputs.version }}" -m "Release v${{ steps.package-version.outputs.version }}" || true
-          git push origin "v${{ steps.package-version.outputs.version }}" || true
-
       - name: Generate changelog
-        if: steps.check-version.outputs.skip == 'false'
         id: changelog
         run: |
           echo "changelog<<EOF" >> $GITHUB_OUTPUT
@@ -104,24 +86,19 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
-        if: steps.check-version.outputs.skip == 'false'
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: v${{ steps.package-version.outputs.version }}
-          name: Release v${{ steps.package-version.outputs.version }}
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Release v${{ steps.version.outputs.version }}
           body: |
-            ## Changes in v${{ steps.package-version.outputs.version }}
+            ## Changes in v${{ steps.version.outputs.version }}
 
             ${{ steps.changelog.outputs.changelog }}
 
             ## Installation
 
             ```bash
-            # From npm
             npm install -g claude-code-usage
-
-            # From GitHub Packages
-            npm install -g @evanlong-me/claude-code-usage --registry=https://npm.pkg.github.com
             ```
 
             ## Usage
