@@ -44,11 +44,13 @@ jobs:
       - name: Test package
         run: npm test || echo "No tests specified"
 
-      - name: Setup npm for Trusted Publishing
-        uses: azu/setup-npm-trusted-publish@v1.0.3
+      - name: Upgrade npm for Trusted Publishing
+        run: npm install -g npm@latest
 
       - name: Publish to npm (Trusted Publishing)
         run: npm publish --provenance --access public
+        env:
+          NPM_CONFIG_PROVENANCE: true
 
       - name: Setup Node.js for GitHub Packages
         uses: actions/setup-node@v4
