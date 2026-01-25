@@ -45,7 +45,7 @@ jobs:
         run: npm test || echo "No tests specified"
 
       - name: Setup npm for Trusted Publishing
-        uses: azu/setup-npm-trusted-publish@v1
+        uses: azu/setup-npm-trusted-publish@v1.0.3
 
       - name: Publish to npm (Trusted Publishing)
         run: npm publish --provenance --access public
