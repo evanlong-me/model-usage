@@ -22,7 +22,7 @@ program
   .option('-t, --time <filter>', 'Examples:\n                           Relative: 30min, 2h, 7d, 1m, 1y\n                           ISO8601: 2025-01-30T16:30:15 (supports h/m/s precision)\n                           Ranges: 2025-01-30T16,2025-01-30T18 (hour)\n                                   2025-01-30T16:30,2025-01-30T18:45 (minute)\n                                   2025-01-30T16:30:15,2025-01-30T18:45:30 (second)')
   .option('-p, --project <name>', 'Project name filter (partial matching supported)')
   .option('-s, --sort <field>', 'Sort by field (cost, time, tokens, project)', 'time')
-  .option('-o, --order <direction>', 'Sort order (asc, desc)', 'desc')
+  .option('-o, --order <direction>', 'Sort order (asc, desc)', 'asc')
   .option('-d, --detailed', 'Show detailed view with individual messages (default: aggregated by day)')
   .option('-a, --all', 'Show all projects (default: auto-detect current project if in project directory)')
   .option('-lp, --list-projects', 'List all available projects')
