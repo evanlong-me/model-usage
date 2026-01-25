@@ -141,8 +141,8 @@ ccu -s tokens -o desc
 # Sort by project name
 ccu -s project -o asc
 
-# Sort by time (default)
-ccu -s time -o desc
+# Sort by time (default: ascending, newest at bottom)
+ccu -s time -o asc
 
 # Combine sorting with filtering
 ccu -p my-website -s cost -o desc  # my-website project sorted by cost
@@ -214,7 +214,7 @@ Complete reference table of all available options:
 | `-t, --time` | Time filter | `5min`, `2h`, `7d`, `1m`, `1y`, `6-8`, `july-august`, `2024-07-01T14:30,2024-07-01T16:45`, etc. | - |
 | `-p, --project` | Project filter | Project name (partial matching) | auto-detect |
 | `-s, --sort` | Sort field | `cost`, `time`, `tokens`, `project` | `time` |
-| `-o, --order` | Sort order | `asc`, `desc` | `desc` |
+| `-o, --order` | Sort order | `asc`, `desc` | `asc` |
 | `-d, --detailed` | Show individual messages | - | `false` (aggregated) |
 | `-a, --all` | Show all projects | - | `false` (auto-detect) |
 | `-lp, --list-projects` | List all projects | - | - |

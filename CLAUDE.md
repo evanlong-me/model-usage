@@ -26,6 +26,7 @@ ccu -t 7d              # Last 7 days
 ccu -t 2h              # Last 2 hours
 ccu -p <project>       # Filter by project
 ccu -s cost -o desc    # Sort by cost descending
+ccu -s time -o asc     # Sort by time ascending (default)
 ccu -d                 # Detailed view (individual messages)
 ccu -lp                # List projects
 ccu -lm                # List models with pricing
