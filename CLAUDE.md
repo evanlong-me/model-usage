@@ -21,14 +21,23 @@ A lightweight CLI tool for analyzing Claude Code usage statistics and costs loca
 ## Key Commands
 
 ```bash
+# Default
 ccu                    # Show usage (auto-detect project)
+
+# Filtering
 ccu -t 7d              # Last 7 days
 ccu -t 2h              # Last 2 hours
 ccu -p <project>       # Filter by project
+
+# Sorting
 ccu -s cost -o desc    # Sort by cost descending
 ccu -s time -o asc     # Sort by time ascending (default)
+
+# View modes
 ccu -d                 # Detailed view (individual messages)
 ccu --by-date          # Aggregate by date only (combines all projects)
+
+# Lists
 ccu -lp                # List projects
 ccu -lm                # List models with pricing
 ```
