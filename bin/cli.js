@@ -30,6 +30,60 @@ program
   .option('-lm, --list-models', 'List all available models with pricing')
   .option('--disable-github-prompt', 'Permanently disable the GitHub star prompt')
   .option('--enable-github-prompt', 'Re-enable the GitHub star prompt')
+  .configureHelp({
+    formatHelp(cmd, helper) {
+      const groups = {
+        Filtering: ['time', 'project', 'all'],
+        'View modes': ['detailed', 'by-date'],
+        Sorting: ['sort', 'order'],
+        Lists: ['list-projects', 'list-models'],
+        Config: ['disable-github-prompt', 'enable-github-prompt'],
+        Other: ['help', 'version']
+      };
+      const groupOf = name => {
+        for (const [g, names] of Object.entries(groups)) {
+          if (names.includes(name)) return g;
+        }
+        return 'Other';
+      };
+
+      const visibleOptions = helper.visibleOptions(cmd);
+      const helpWidth = helper.helpWidth || 80;
+      const termWidth = Math.max(...visibleOptions.map(o => helper.optionTerm(o).length));
+      const itemIndent = 2;
+      const itemSep = 2;
+
+      const formatItem = (term, description) => {
+        const padded = term.padEnd(termWidth + itemSep);
+        if (!description) return padded.trimEnd();
+        return helper.wrap(padded + description, helpWidth - itemIndent, termWidth + itemSep);
+      };
+      const indentLines = text =>
+        text.split('\n').map(l => ' '.repeat(itemIndent) + l).join('\n');
+
+      let output = [`Usage: ${helper.commandUsage(cmd)}`, ''];
+      const desc = helper.commandDescription(cmd);
+      if (desc) output.push(desc, '');
+
+      const grouped = {};
+      visibleOptions.forEach(opt => {
+        const long = opt.long ? opt.long.replace(/^--/, '') : '';
+        const g = groupOf(long);
+        (grouped[g] = grouped[g] || []).push(opt);
+      });
+
+      Object.keys(groups).forEach(g => {
+        if (!grouped[g] || grouped[g].length === 0) return;
+        output.push(`${g}:`);
+        const lines = grouped[g]
+          .map(o => formatItem(helper.optionTerm(o), helper.optionDescription(o)))
+          .join('\n');
+        output.push(indentLines(lines), '');
+      });
+
+      return output.join('\n');
+    }
+  })
   .action(async (options) => {
     if (options.disableGithubPrompt) {
       await disableGitHubPrompt();

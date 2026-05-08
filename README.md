@@ -177,6 +177,10 @@ ccu
 ccu --detailed
 ccu -d
 
+# Date-only view: aggregate all projects per day (no Project column)
+ccu --by-date
+ccu --by-date -t 7d
+
 # Comparing views for specific projects
 ccu -p my-project       # Aggregated entry for my-project
 ccu -p my-project -d    # All individual my-project messages
@@ -216,6 +220,7 @@ Complete reference table of all available options:
 | `-s, --sort` | Sort field | `cost`, `time`, `tokens`, `project` | `time` |
 | `-o, --order` | Sort order | `asc`, `desc` | `asc` |
 | `-d, --detailed` | Show individual messages | - | `false` (aggregated) |
+| `--by-date` | Aggregate by date only, combining all projects per day | - | `false` |
 | `-a, --all` | Show all projects | - | `false` (auto-detect) |
 | `-lp, --list-projects` | List all projects | - | - |
 | `-lm, --list-models` | List all available models with pricing | - | - |
