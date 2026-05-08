@@ -177,6 +177,10 @@ ccu
 ccu --detailed
 ccu -d
 
+# Date-only view: aggregate all projects per day (no Project column)
+ccu --by-date
+ccu --by-date -t 7d
+
 # Comparing views for specific projects
 ccu -p my-project       # Aggregated entry for my-project
 ccu -p my-project -d    # All individual my-project messages
@@ -207,18 +211,41 @@ Your preference is stored in `~/.claude-code-usage-config.json`.
 
 ### 🅰️ All Options Reference
 
-Complete reference table of all available options:
+Options are grouped by purpose:
+
+#### Filtering
 
 | Option | Description | Values | Default |
 |--------|-------------|--------|---------|
 | `-t, --time` | Time filter | `5min`, `2h`, `7d`, `1m`, `1y`, `6-8`, `july-august`, `2024-07-01T14:30,2024-07-01T16:45`, etc. | - |
 | `-p, --project` | Project filter | Project name (partial matching) | auto-detect |
+| `-a, --all` | Show all projects | - | `false` (auto-detect) |
+
+#### View modes
+
+| Option | Description | Values | Default |
+|--------|-------------|--------|---------|
+| `-d, --detailed` | Show individual messages | - | `false` (aggregated) |
+| `--by-date` | Aggregate by date only, combining all projects per day | - | `false` |
+
+#### Sorting
+
+| Option | Description | Values | Default |
+|--------|-------------|--------|---------|
 | `-s, --sort` | Sort field | `cost`, `time`, `tokens`, `project` | `time` |
 | `-o, --order` | Sort order | `asc`, `desc` | `asc` |
-| `-d, --detailed` | Show individual messages | - | `false` (aggregated) |
-| `-a, --all` | Show all projects | - | `false` (auto-detect) |
+
+#### Lists
+
+| Option | Description | Values | Default |
+|--------|-------------|--------|---------|
 | `-lp, --list-projects` | List all projects | - | - |
 | `-lm, --list-models` | List all available models with pricing | - | - |
+
+#### Config
+
+| Option | Description | Values | Default |
+|--------|-------------|--------|---------|
 | `--disable-github-prompt` | Permanently disable the GitHub star prompt | - | - |
 | `--enable-github-prompt` | Re-enable the GitHub star prompt | - | - |
 
