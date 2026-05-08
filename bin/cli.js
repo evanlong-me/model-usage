@@ -24,6 +24,7 @@ program
   .option('-s, --sort <field>', 'Sort by field (cost, time, tokens, project)', 'time')
   .option('-o, --order <direction>', 'Sort order (asc, desc)', 'asc')
   .option('-d, --detailed', 'Show detailed view with individual messages (default: aggregated by day)')
+  .option('--by-date', 'Aggregate by date only, combining all projects per day')
   .option('-a, --all', 'Show all projects (default: auto-detect current project if in project directory)')
   .option('-lp, --list-projects', 'List all available projects')
   .option('-lm, --list-models', 'List all available models with pricing')
@@ -75,6 +76,9 @@ async function showUsage(options) {
     if (options.detailed) {
       // Show detailed view with individual messages
       finalMessages = filteredMessages;
+    } else if (options.byDate) {
+      // Aggregate by date only (all projects combined per day)
+      finalMessages = aggregator.aggregateMessagesByDate(filteredMessages);
     } else {
       // Default: aggregate messages by project and date
       finalMessages = aggregator.aggregateMessagesByProjectAndDate(filteredMessages);
@@ -116,19 +120,21 @@ async function showUsage(options) {
 
     // Display aggregated messages
     if (finalMessages.length > 0) {
+      const showProjectColumn = !options.byDate;
+      const head = [chalk.white('Time')];
+      if (showProjectColumn) head.push(chalk.white('Project'));
+      head.push(
+        chalk.white('Messages'),
+        chalk.white('Input'),
+        chalk.white('Output'),
+        chalk.white('Cache Create'),
+        chalk.white('Cache Read'),
+        chalk.white('Model'),
+        chalk.white('Total'),
+        chalk.white('Cost (USD)')
+      );
       const table = new Table({
-        head: [
-          chalk.white('Time'),
-          chalk.white('Project'),
-          chalk.white('Messages'),
-          chalk.white('Input'),
-          chalk.white('Output'),
-          chalk.white('Cache Create'),
-          chalk.white('Cache Read'),
-          chalk.white('Model'),
-          chalk.white('Total'),
-          chalk.white('Cost (USD)')
-        ],
+        head,
         style: {
           head: [],
           border: ['gray']
@@ -180,9 +186,9 @@ async function showUsage(options) {
         // Format cost as currency (rounded to 2 decimal places with thousands separator)
         const costFormatted = '$' + (msg.cost || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
-        table.push([
-          chalk.gray(timeFormatted),
-          chalk.yellow(msg.project || ''),
+        const row = [chalk.gray(timeFormatted)];
+        if (showProjectColumn) row.push(chalk.yellow(msg.project || ''));
+        row.push(
           { content: chalk.white(projectMsgCount.toLocaleString()), hAlign: 'right' },
           { content: chalk.yellow(msgInput.toLocaleString()), hAlign: 'right' },
           { content: chalk.yellow(msgOutput.toLocaleString()), hAlign: 'right' },
@@ -191,15 +197,16 @@ async function showUsage(options) {
           chalk.white(msg.model || ''),
           { content: chalk.green(totalTokens.toLocaleString()), hAlign: 'right' },
           { content: chalk.green(costFormatted), hAlign: 'right' }
-        ]);
+        );
+        table.push(row);
       });
 
       // Add total row
       const totalCostFormatted = '$' + totalCost.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
       
-      table.push([
-        chalk.bold.cyan('TOTAL'),
-        chalk.bold.cyan(''),
+      const totalRow = [chalk.bold.cyan('TOTAL')];
+      if (showProjectColumn) totalRow.push(chalk.bold.cyan(''));
+      totalRow.push(
         { content: chalk.bold.green(totalMessages.toLocaleString()), hAlign: 'right' },
         { content: chalk.bold.green(totalInput.toLocaleString()), hAlign: 'right' },
         { content: chalk.bold.green(totalOutput.toLocaleString()), hAlign: 'right' },
@@ -208,7 +215,8 @@ async function showUsage(options) {
         chalk.bold.cyan(''),
         { content: chalk.bold.green(grandTotal.toLocaleString()), hAlign: 'right' },
         { content: chalk.bold.green(totalCostFormatted), hAlign: 'right' }
-      ]);
+      );
+      table.push(totalRow);
 
       console.log(table.toString());
       
