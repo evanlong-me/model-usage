@@ -28,6 +28,7 @@ ccu                    # Show usage (auto-detect project)
 ccu -t 7d              # Last 7 days
 ccu -t 2h              # Last 2 hours
 ccu -p <project>       # Filter by project
+ccu -m <model>         # Filter by model (partial match: "sonnet", "claude-3-5")
 
 # Sorting
 ccu -s cost -o desc    # Sort by cost descending
@@ -40,6 +41,10 @@ ccu --by-date          # Aggregate by date only (combines all projects)
 # Lists
 ccu -lp                # List projects
 ccu -lm                # List models with pricing
+
+# Combined
+ccu -m sonnet -t 7d    # Last 7 days, sonnet models only
+ccu -m haiku -p myproject --by-date  # Per-day, haiku only, specific project
 ```
 
 ## Development

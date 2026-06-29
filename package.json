@@ -2,7 +2,7 @@
   "name": "claude-code-usage",
   "version": "2.9.3",
   "description": "A lightweight CLI tool for analyzing Claude Code usage statistics and costs locally",
-  "main": "index.js",
+  "main": "bin/cli.js",
   "bin": {
     "claude-code-usage": "bin/cli.js",
     "ccu": "bin/cli.js"

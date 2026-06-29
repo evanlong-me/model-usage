@@ -21,6 +21,7 @@ program
   .description('A CLI tool for viewing Claude Code usage statistics')
   .option('-t, --time <filter>', 'Examples:\n                           Relative: 30min, 2h, 7d, 1m, 1y\n                           ISO8601: 2025-01-30T16:30:15 (supports h/m/s precision)\n                           Ranges: 2025-01-30T16,2025-01-30T18 (hour)\n                                   2025-01-30T16:30,2025-01-30T18:45 (minute)\n                                   2025-01-30T16:30:15,2025-01-30T18:45:30 (second)')
   .option('-p, --project <name>', 'Project name filter (partial matching supported)')
+  .option('-m, --model <name>', 'Model name filter — partial matching supported (e.g. "sonnet-4", "claude-3-5")')
   .option('-s, --sort <field>', 'Sort by field (cost, time, tokens, project)', 'time')
   .option('-o, --order <direction>', 'Sort order (asc, desc)', 'asc')
   .option('-d, --detailed', 'Show detailed view with individual messages (default: aggregated by day)')
@@ -33,7 +34,7 @@ program
   .configureHelp({
     formatHelp(cmd, helper) {
       const groups = {
-        Filtering: ['time', 'project', 'all'],
+        Filtering: ['time', 'project', 'model', 'all'],
         'View modes': ['detailed', 'by-date'],
         Sorting: ['sort', 'order'],
         Lists: ['list-projects', 'list-models'],
@@ -122,7 +123,8 @@ async function showUsage(options) {
     // Apply filters
     let filteredMessages = filters.applyFilters(messages, {
       timeFilter: options.time,
-      projectFilter: options.project
+      projectFilter: options.project,
+      modelFilter: options.model
     });
     
     // Decide whether to aggregate or show detailed view
@@ -144,7 +146,7 @@ async function showUsage(options) {
     }
     
     // Show filter and sort info if applied
-    if (options.time || options.project || (options.sort && options.sort !== 'time') || (options.order && options.order !== 'asc')) {
+    if (options.time || options.project || options.model || (options.sort && options.sort !== 'time') || (options.order && options.order !== 'asc')) {
       console.log(chalk.cyan('🔍 Options applied:'));
       if (options.time) {
         console.log(chalk.gray(`  Time: ${options.time}`));
@@ -155,6 +157,9 @@ async function showUsage(options) {
           : options.project;
         console.log(chalk.gray(`  Project: ${projectDisplay}`));
       }
+      if (options.model) {
+        console.log(chalk.gray(`  Model: ${options.model}`));
+      }
       if (options.sort || options.order) {
         const sortBy = options.sort || 'time';
         const sortOrder = options.order || 'asc';
@@ -162,7 +167,7 @@ async function showUsage(options) {
         console.log(chalk.gray(`  Sort: ${sortBy} ${sortIcon}`));
       }
       
-      if (options.time || options.project) {
+      if (options.time || options.project || options.model) {
         if (options.detailed) {
           console.log(chalk.gray(`  Results: ${finalMessages.length} messages (from ${messages.length} total)`));
         } else {
@@ -279,11 +284,13 @@ async function showUsage(options) {
     } else {
       console.log(chalk.yellow('📭 No messages found matching the specified filters.'));
       
-      if (options.time || options.project) {
+      if (options.time || options.project || options.model) {
         console.log(chalk.gray('\nTry adjusting your filters:'));
         console.log(chalk.gray('  • Use broader time ranges (e.g., 1m instead of 7d)'));
         console.log(chalk.gray('  • Check project name spelling'));
+        console.log(chalk.gray('  • Check model name spelling (try partial match, e.g. "sonnet")'));
         console.log(chalk.gray('  • Use --list-projects to see available projects'));
+        console.log(chalk.gray('  • Use -lm to see available models'));
       }
     }
 

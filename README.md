@@ -10,7 +10,7 @@ A lightweight CLI tool for analyzing Claude Code usage statistics and costs loca
 - 📊 **Dual View Modes** - Switch between daily aggregated view and detailed message view
 - 🎯 **Smart Project Detection** - Auto-detects current project when run in project directories
 - 📋 **Clean Table Display** - Organized tabular output with token counts, costs, and project info
-- 🔍 **Smart Filtering** - Filter by time ranges and project names
+- 🔍 **Smart Filtering** - Filter by time ranges, project names, and models
 - 📈 **Flexible Sorting** - Sort by cost, time, tokens, or project name
 - 🔄 **Auto Update Check** - Automatically checks for new versions and notifies when updates are available
 - 🚀 **Easy to Use** - Simple installation and intuitive commands
@@ -120,8 +120,15 @@ ccu -t 2024-7-2024-8      # July 2024 to August 2024
 # Filter by project (partial matching supported)
 ccu -p myproject    # Show only messages from projects containing "myproject"
 
+# Filter by model (partial matching supported)
+ccu -m sonnet           # Show only messages from models containing "sonnet"
+ccu -m claude-3-5       # Show only messages matching "claude-3-5"
+ccu -m haiku-4-5        # Show only haiku-4-5 model messages
+
 # Combine filters for precise results
-ccu -t 1m -p my-website # Last month's my-website project data
+ccu -t 1m -p my-website       # Last month's my-website project data
+ccu -t 7d -m sonnet           # Last 7 days, sonnet models only
+ccu -m haiku -p myproject --by-date  # Per-day, haiku only, specific project
 ```
 
 ### 📈 Sorting Options
@@ -146,6 +153,23 @@ ccu -s time -o asc
 
 # Combine sorting with filtering
 ccu -p my-website -s cost -o desc  # my-website project sorted by cost
+```
+
+### 💡 Model Filtering
+
+Filter usage by model name (supports partial matching):
+
+```bash
+# Filter by specific model
+ccu -m claude-sonnet-4-6
+
+# Partial matching works too
+ccu -m sonnet           # Matches claude-sonnet-4-6, claude-3-5-sonnet, etc.
+ccu -m haiku            # Matches claude-haiku-4-5, claude-3-5-haiku, etc.
+
+# Combine with other filters
+ccu -m sonnet -t 7d     # Last 7 days, sonnet models only
+ccu -m haiku --by-date  # Per-day aggregation, haiku only
 ```
 
 ### 🎯 Project Auto-Detection
@@ -219,6 +243,7 @@ Options are grouped by purpose:
 |--------|-------------|--------|---------|
 | `-t, --time` | Time filter | `5min`, `2h`, `7d`, `1m`, `1y`, `6-8`, `july-august`, `2024-07-01T14:30,2024-07-01T16:45`, etc. | - |
 | `-p, --project` | Project filter | Project name (partial matching) | auto-detect |
+| `-m, --model` | Model filter | Model name (partial matching, e.g. "sonnet", "haiku") | - |
 | `-a, --all` | Show all projects | - | `false` (auto-detect) |
 
 #### View modes
