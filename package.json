@@ -1,6 +1,6 @@
 {
   "name": "model-usage",
-  "version": "2.11.1",
+  "version": "2.11.2",
   "description": "Zero-config CLI for analyzing AI model usage & costs across all local TUI tools — pi, Claude Code, Codex, Gemini CLI, OpenCode, and more",
   "main": "bin/cli.js",
   "bin": {
