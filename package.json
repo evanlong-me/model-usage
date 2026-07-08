@@ -1,6 +1,6 @@
 {
   "name": "model-usage",
-  "version": "2.9.4",
+  "version": "2.10.0",
   "description": "A lightweight CLI tool for analyzing AI model usage statistics and costs locally",
   "main": "bin/cli.js",
   "bin": {
