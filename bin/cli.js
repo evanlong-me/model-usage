@@ -12,6 +12,8 @@ const aggregator = require('../lib/aggregator');
 const projectDetector = require('../lib/project-detector');
 const pricing = require('../lib/pricing');
 const updateChecker = require('../lib/update-checker');
+const { discoverSources } = require('../lib/sources');
+const { selectSources, getSourcePreviews } = require('../lib/source-selector');
 const { showGitHubStarPrompt, disableGitHubPrompt, enableGitHubPrompt } = require('../lib/github-prompt');
 const { version } = require('../package.json');
 
@@ -31,6 +33,7 @@ program
   .option('-lm, --list-models', 'List all available models with pricing')
   .option('--disable-github-prompt', 'Permanently disable the GitHub star prompt')
   .option('--enable-github-prompt', 'Re-enable the GitHub star prompt')
+  .option('--sources <list>', 'TUI sources to query: comma-separated names (e.g. "pi,opencode"),\n                           "all" for all, or omit for interactive selection')
   .configureHelp({
     formatHelp(cmd, helper) {
       const groups = {
@@ -38,7 +41,7 @@ program
         'View modes': ['detailed', 'by-date'],
         Sorting: ['sort', 'order'],
         Lists: ['list-projects', 'list-models'],
-        Config: ['disable-github-prompt', 'enable-github-prompt'],
+        Config: ['disable-github-prompt', 'enable-github-prompt', 'sources'],
         Other: ['help', 'version']
       };
       const groupOf = name => {
@@ -91,34 +94,64 @@ program
     } else if (options.enableGithubPrompt) {
       await enableGitHubPrompt();
     } else if (options.listProjects) {
-      await showProjects();
+      const sourceNames = await resolveSources(options);
+      await showProjects(sourceNames);
     } else if (options.listModels) {
       await showModels();
     } else {
-      // Apply project auto-detection
+      const sourceNames = await resolveSources(options);
       const projectAwareOptions = await projectDetector.getProjectAwareOptions(options);
-      await showUsage(projectAwareOptions);
+      await showUsage(projectAwareOptions, sourceNames);
     }
   });
 
 
+/**
+ * Resolve which TUI data sources to query.
+ * - --sources=<list>: parse comma-separated list
+ * - --sources=all or non-TTY: use all available sources
+ * - Otherwise: show interactive selection UI
+ */
+async function resolveSources(options) {
+  const allSources = discoverSources();
+
+  if (options.sources) {
+    if (options.sources === 'all') return null;
+    return options.sources.split(',').map(s => s.trim()).filter(Boolean);
+  }
+
+  if (!process.stdout.isTTY) return null;
+
+  const availableSources = allSources.filter(s => s.available);
+  if (availableSources.length <= 1) return null;
+
+  const previews = await getSourcePreviews(availableSources);
+  const sourceInfos = allSources.map(s => {
+    const preview = previews.find(p => p.name === s.name);
+    return { ...s, messageCount: preview ? preview.messageCount : 0 };
+  });
+
+  const selected = await selectSources(sourceInfos, { isTTY: process.stdout.isTTY });
+  return selected; // May be empty if user deselected all
+}
 
 // If no options provided, show usage by default
 if (process.argv.slice(2).length === 0) {
   (async () => {
+    const sourceNames = await resolveSources({});
     const options = await projectDetector.getProjectAwareOptions({ sort: 'time', order: 'asc' });
-    await showUsage(options);
+    await showUsage(options, sourceNames);
   })();
 } else {
   program.parse(process.argv);
 }
 
-async function showUsage(options) {
+async function showUsage(options, sourceNames) {
   // Check for updates
   await updateChecker.checkForUpdates();
   
   try {
-    const { messages } = await usage.getUsage();
+    const { messages } = await usage.getUsage({ sourceNames });
     
     // Apply filters
     let filteredMessages = filters.applyFilters(messages, {
@@ -303,13 +336,13 @@ async function showUsage(options) {
   }
 }
 
-async function showProjects() {
+async function showProjects(sourceNames) {
   // Check for updates
   await updateChecker.checkForUpdates();
   
   const spinner = createSpinner('Fetching project list...').start();
   try {
-    const { projects, messageCount } = await usage.getProjects();
+    const { projects, messageCount } = await usage.getProjects({ sourceNames });
     spinner.stop();
     
     if (projects.length > 0) {

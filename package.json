@@ -1,7 +1,7 @@
 {
   "name": "model-usage",
   "version": "2.10.1",
-  "description": "A lightweight CLI tool for analyzing AI model usage statistics and costs locally",
+  "description": "Zero-config CLI for analyzing AI model usage & costs across all local TUI tools — pi, Claude Code, Codex, Gemini CLI, OpenCode, and more",
   "main": "bin/cli.js",
   "bin": {
     "model-usage": "bin/cli.js",
@@ -21,11 +21,18 @@
     "token-counter",
     "token-usage",
     "developer-tools",
-    "api-usage"
+    "api-usage",
+    "tui",
+    "claude-code",
+    "codex",
+    "gemini-cli",
+    "opencode",
+    "pi"
   ],
   "author": "Evan Long <mail@evanlong.me>",
   "license": "MIT",
   "dependencies": {
+    "@inquirer/prompts": "^8.5.2",
     "chalk": "^4.1.2",
     "cli-table3": "^0.6.5",
     "commander": "^11.1.0",
@@ -33,7 +40,7 @@
     "nanospinner": "^1.2.2"
   },
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=22.0.0"
   },
   "repository": {
     "type": "git",
