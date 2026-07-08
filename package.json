@@ -1,26 +1,25 @@
 {
-  "name": "claude-code-usage",
+  "name": "model-usage",
   "version": "2.9.4",
-  "description": "A lightweight CLI tool for analyzing Claude Code usage statistics and costs locally",
+  "description": "A lightweight CLI tool for analyzing AI model usage statistics and costs locally",
   "main": "bin/cli.js",
   "bin": {
-    "claude-code-usage": "bin/cli.js",
-    "ccu": "bin/cli.js"
+    "model-usage": "bin/cli.js",
+    "mu": "bin/cli.js"
   },
   "scripts": {
     "start": "node bin/cli.js"
   },
   "keywords": [
-    "claude",
-    "claude-code",
-    "claude-ai",
-    "anthropic",
     "ai",
+    "llm",
+    "model",
     "usage",
     "statistics",
     "cli",
     "cost-tracking",
     "token-counter",
+    "token-usage",
     "developer-tools",
     "api-usage"
   ],
@@ -38,10 +37,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/evanlong-me/claude-code-usage.git"
+    "url": "git+https://github.com/evanlong-me/model-usage.git"
   },
   "bugs": {
-    "url": "https://github.com/evanlong-me/claude-code-usage/issues"
+    "url": "https://github.com/evanlong-me/model-usage/issues"
   },
-  "homepage": "https://github.com/evanlong-me/claude-code-usage#readme"
+  "homepage": "https://github.com/evanlong-me/model-usage#readme"
 }

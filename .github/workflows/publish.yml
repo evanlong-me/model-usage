@@ -69,13 +69,13 @@ jobs:
             ## Installation
 
             ```bash
-            npm install -g claude-code-usage
+            npm install -g model-usage
             ```
 
             ## Usage
 
             ```bash
-            ccu
+            mu
             ```
           draft: false
           prerelease: false

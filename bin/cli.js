@@ -16,12 +16,12 @@ const { showGitHubStarPrompt, disableGitHubPrompt, enableGitHubPrompt } = requir
 const { version } = require('../package.json');
 
 program
-  .name('claude-code-usage')
+  .name('model-usage')
   .version(version, '-v, --version', 'display version number')
-  .description('A CLI tool for viewing Claude Code usage statistics')
+  .description('A CLI tool for viewing AI model usage statistics')
   .option('-t, --time <filter>', 'Examples:\n                           Relative: 30min, 2h, 7d, 1m, 1y\n                           ISO8601: 2025-01-30T16:30:15 (supports h/m/s precision)\n                           Ranges: 2025-01-30T16,2025-01-30T18 (hour)\n                                   2025-01-30T16:30,2025-01-30T18:45 (minute)\n                                   2025-01-30T16:30:15,2025-01-30T18:45:30 (second)')
   .option('-p, --project <name>', 'Project name filter (partial matching supported)')
-  .option('-m, --model <name>', 'Model name filter — partial matching supported (e.g. "sonnet-4", "claude-3-5")')
+  .option('-m, --model <name>', 'Model name filter — partial matching supported (e.g. "gpt-4", "sonnet")')
   .option('-s, --sort <field>', 'Sort by field (cost, time, tokens, project)', 'time')
   .option('-o, --order <direction>', 'Sort order (asc, desc)', 'asc')
   .option('-d, --detailed', 'Show detailed view with individual messages (default: aggregated by day)')
@@ -359,12 +359,8 @@ async function showModels() {
         }
       });
       
-      // Filter to show only Claude models
-      const claudeModels = models.filter(model => 
-        model.toLowerCase().includes('claude')
-      );
-      
-      claudeModels.forEach(modelName => {
+      // Show all available models
+      models.forEach(modelName => {
         const modelPricing = pricing.getModelPricing(modelName, pricingData);
         if (modelPricing) {
           const inputCost = modelPricing.input_cost_per_token ? 
@@ -387,11 +383,6 @@ async function showModels() {
       });
       
       console.log(table.toString());
-      
-      if (claudeModels.length < models.length) {
-        console.log(chalk.gray(`\nShowing ${claudeModels.length} Claude models out of ${models.length} total models.`));
-        console.log(chalk.gray('Use --list-all-models to see all available models.'));
-      }
       
       // Add GitHub star prompt
       await showGitHubStarPrompt();

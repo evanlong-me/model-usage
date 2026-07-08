@@ -1,12 +1,12 @@
-# Claude Code Usage
+# Model Usage
 
-A lightweight CLI tool for analyzing Claude Code usage statistics and costs locally.
+A lightweight CLI tool for analyzing AI model usage statistics and costs locally.
 
 ## ✨ Features
 
-- 🔒 **100% Local & Secure** - No API keys required, reads local Claude Code data only
-- ⚡ **Quick Analysis** - View all usage statistics with a single `ccu` command
-- 💰 **Cost Tracking** - Accurate cost calculation based on Claude pricing
+- 🔒 **100% Local & Secure** - No API keys required, reads local model usage data only
+- ⚡ **Quick Analysis** - View all usage statistics with a single `mu` command
+- 💰 **Cost Tracking** - Accurate cost calculation based on model pricing
 - 📊 **Dual View Modes** - Switch between daily aggregated view and detailed message view
 - 🎯 **Smart Project Detection** - Auto-detects current project when run in project directories
 - 📋 **Clean Table Display** - Organized tabular output with token counts, costs, and project info
@@ -19,19 +19,19 @@ A lightweight CLI tool for analyzing Claude Code usage statistics and costs loca
 
 ### Global Installation (Recommended)
 ```bash
-npm install -g claude-code-usage
-ccu  # View statistics instantly
+npm install -g model-usage
+mu  # View statistics instantly
 ```
 
 ### Alternative Installation Methods
 
 ```bash
 # One-time usage (no installation required)
-npx claude-code-usage
+npx model-usage
 
 # Local project installation
-npm install claude-code-usage
-npx claude-code-usage
+npm install model-usage
+npx model-usage
 ```
 
 ## 📋 Usage
@@ -42,23 +42,23 @@ These are the basic commands you can use:
 
 ```bash
 # View usage statistics (default command)
-ccu
+mu
 
 # Display version information
-ccu -v
+mu -v
 
 # Display help information
-ccu --help
+mu --help
 
 # List all available projects
-ccu --list-projects
+mu --list-projects
 # or use the short form
-ccu -lp
+mu -lp
 
 # List all available models with pricing
-ccu --list-models
+mu --list-models
 # or use the short form
-ccu -lm
+mu -lm
 ```
 
 ### 🔍 Filtering Options
@@ -95,40 +95,40 @@ The tool supports various time filtering formats for maximum flexibility:
 
 ```bash
 # Filter by relative time (no quotes needed)
-ccu -t 5min         # Last 5 minutes
-ccu -t 2h           # Last 2 hours
-ccu -t 7d           # Last 7 days
-ccu -t 1m           # Last 1 month
-ccu -t 1y           # Last 1 year
+mu -t 5min         # Last 5 minutes
+mu -t 2h           # Last 2 hours
+mu -t 7d           # Last 7 days
+mu -t 1m           # Last 1 month
+mu -t 1y           # Last 1 year
 
 # Filter by month range (no quotes needed)
-ccu -t 6-8          # June to August (current year)
-ccu -t july-august  # July to August (current year)
+mu -t 6-8          # June to August (current year)
+mu -t july-august  # July to August (current year)
 
 # Filter by date and time (T-separator, no quotes needed)
-ccu -t 2024-07-01T14:30:15,2024-07-01T16:45:30  # With seconds
-ccu -t 2024-07-01T14:30,2024-07-01T16:45     # With minutes
-ccu -t 2024-07-01T14,2024-07-01T16         # With hours
+mu -t 2024-07-01T14:30:15,2024-07-01T16:45:30  # With seconds
+mu -t 2024-07-01T14:30,2024-07-01T16:45     # With minutes
+mu -t 2024-07-01T14,2024-07-01T16         # With hours
 
 # Filter by date and time (space separator, quotes needed)
-ccu -t "2024-07-01 14:30,2024-07-01 16:45"
+mu -t "2024-07-01 14:30,2024-07-01 16:45"
 
 # Filter by specific date range
-ccu -t 2024-07-01,2024-08-31
-ccu -t 2024-7-2024-8      # July 2024 to August 2024
+mu -t 2024-07-01,2024-08-31
+mu -t 2024-7-2024-8      # July 2024 to August 2024
 
 # Filter by project (partial matching supported)
-ccu -p myproject    # Show only messages from projects containing "myproject"
+mu -p myproject    # Show only messages from projects containing "myproject"
 
 # Filter by model (partial matching supported)
-ccu -m sonnet           # Show only messages from models containing "sonnet"
-ccu -m claude-3-5       # Show only messages matching "claude-3-5"
-ccu -m haiku-4-5        # Show only haiku-4-5 model messages
+mu -m sonnet           # Show only messages from models containing "sonnet"
+mu -m gpt-4             # Show only messages matching "gpt-4"
+mu -m haiku-4-5        # Show only haiku-4-5 model messages
 
 # Combine filters for precise results
-ccu -t 1m -p my-website       # Last month's my-website project data
-ccu -t 7d -m sonnet           # Last 7 days, sonnet models only
-ccu -m haiku -p myproject --by-date  # Per-day, haiku only, specific project
+mu -t 1m -p my-website       # Last month's my-website project data
+mu -t 7d -m sonnet           # Last 7 days, sonnet models only
+mu -m haiku -p myproject --by-date  # Per-day, haiku only, specific project
 ```
 
 ### 📈 Sorting Options
@@ -137,22 +137,22 @@ Sort your results by different criteria:
 
 ```bash
 # Sort by cost (highest first)
-ccu -s cost -o desc
+mu -s cost -o desc
 
 # Sort by cost (lowest first)
-ccu -s cost -o asc
+mu -s cost -o asc
 
 # Sort by total tokens
-ccu -s tokens -o desc
+mu -s tokens -o desc
 
 # Sort by project name
-ccu -s project -o asc
+mu -s project -o asc
 
 # Sort by time (default: ascending, newest at bottom)
-ccu -s time -o asc
+mu -s time -o asc
 
 # Combine sorting with filtering
-ccu -p my-website -s cost -o desc  # my-website project sorted by cost
+mu -p my-website -s cost -o desc  # my-website project sorted by cost
 ```
 
 ### 💡 Model Filtering
@@ -161,15 +161,15 @@ Filter usage by model name (supports partial matching):
 
 ```bash
 # Filter by specific model
-ccu -m claude-sonnet-4-6
+mu -m gpt-4.1
 
 # Partial matching works too
-ccu -m sonnet           # Matches claude-sonnet-4-6, claude-3-5-sonnet, etc.
-ccu -m haiku            # Matches claude-haiku-4-5, claude-3-5-haiku, etc.
+mu -m gpt               # Matches gpt-4.1, gpt-4o, etc.
+mu -m claude            # Matches claude-sonnet-4-6, claude-3-5-sonnet, etc.
 
 # Combine with other filters
-ccu -m sonnet -t 7d     # Last 7 days, sonnet models only
-ccu -m haiku --by-date  # Per-day aggregation, haiku only
+mu -m sonnet -t 7d     # Last 7 days, sonnet models only
+mu -m haiku --by-date  # Per-day aggregation, haiku only
 ```
 
 ### 🎯 Project Auto-Detection
@@ -179,14 +179,14 @@ The tool automatically detects your current project and filters results accordin
 ```bash
 # When run in a project directory, automatically filters to that project
 cd my-project
-ccu                     # Shows only my-project usage
+mu                      # Shows only my-project usage
 
 # Show all projects explicitly
-ccu --all               # Shows usage for all projects
-ccu -a
+mu --all                # Shows usage for all projects
+mu -a
 
 # Manual project filtering still works
-ccu -p specific-project # Shows only specific-project usage
+mu -p specific-project  # Shows only specific-project usage
 ```
 
 ### 📊 View Modes
@@ -195,19 +195,19 @@ Switch between different viewing modes:
 
 ```bash
 # Default: aggregated view (by project and date)
-ccu
+mu
 
 # Detailed view: show individual messages
-ccu --detailed
-ccu -d
+mu --detailed
+mu -d
 
 # Date-only view: aggregate all projects per day (no Project column)
-ccu --by-date
-ccu --by-date -t 7d
+mu --by-date
+mu --by-date -t 7d
 
 # Comparing views for specific projects
-ccu -p my-project       # Aggregated entry for my-project
-ccu -p my-project -d    # All individual my-project messages
+mu -p my-project        # Aggregated entry for my-project
+mu -p my-project -d     # All individual my-project messages
 ```
 
 ### ⭐ GitHub Prompt Configuration
@@ -216,13 +216,13 @@ Manage the GitHub star prompt that appears after displaying results:
 
 ```bash
 # Permanently disable the GitHub star prompt
-ccu --disable-github-prompt
+mu --disable-github-prompt
 
 # Re-enable the GitHub star prompt
-ccu --enable-github-prompt
+mu --enable-github-prompt
 
 # View all available options (including prompt settings)
-ccu -h
+mu -h
 ```
 
 The tool will show a friendly prompt asking you to star the repository on GitHub after displaying usage statistics. You can:
@@ -231,7 +231,7 @@ The tool will show a friendly prompt asking you to star the repository on GitHub
 - **Disable it permanently** - The setting is saved and respected across all future runs
 - **Re-enable it anytime** - If you change your mind
 
-Your preference is stored in `~/.claude-code-usage-config.json`.
+Your preference is stored in `~/.model-usage-config.json`.
 
 ### 🅰️ All Options Reference
 
@@ -287,11 +287,11 @@ An example of what the output may look like:
 ┌─────────────┬─────────────┬──────────┬───────┬────────┬──────────────┬────────────┬──────────────────────────┬───────────┬───────────┐
 │ Time        │ Project     │ Messages │ Input │ Output │ Cache Create │ Cache Read │ Model                    │ Total     │ Cost      │
 ├─────────────┼─────────────┼──────────┼───────┼────────┼──────────────┼────────────┼──────────────────────────┼───────────┼───────────┤
-│ 6/29/2025   │ my-website  │ 15       │ 1,200 │ 400    │ 60,000       │ 20,000     │ claude-sonnet-4-20250514 │ 81,600    │ $0.249000 │
+│ 6/29/2025   │ my-website  │ 15       │ 1,200 │ 400    │ 60,000       │ 20,000     │ gpt-4.1                  │ 81,600    │ $0.249000 │
 ├─────────────┼─────────────┼──────────┼───────┼────────┼──────────────┼────────────┼──────────────────────────┼───────────┼───────────┤
-│ 6/28/2025   │ my-website  │ 20       │ 800   │ 300    │ 40,000       │ 15,000     │ claude-sonnet-4-20250514 │ 56,100    │ $0.168500 │
+│ 6/28/2025   │ my-website  │ 20       │ 800   │ 300    │ 40,000       │ 15,000     │ gpt-4.1                  │ 56,100    │ $0.168500 │
 ├─────────────┼─────────────┼──────────┼───────┼────────┼──────────────┼────────────┼──────────────────────────┼───────────┼───────────┤
-│ 6/27/2025   │ my-website  │ 10       │ 845   │ 428    │ 198,600      │ 652,976    │ claude-sonnet-4-20250514 │ 852,849   │ $0.734798 │
+│ 6/27/2025   │ my-website  │ 10       │ 845   │ 428    │ 198,600      │ 652,976    │ gpt-4.1                  │ 852,849   │ $0.734798 │
 ├─────────────┼─────────────┼──────────┼───────┼────────┼──────────────┼────────────┼──────────────────────────┼───────────┼───────────┤
 │ TOTAL       │             │ 45       │ 2,845 │ 1,128  │ 298,600      │ 687,976    │                          │ 990,549   │ $1.152298 │
 └─────────────┴─────────────┴──────────┴───────┴────────┴──────────────┴────────────┴──────────────────────────┴───────────┴───────────┘
@@ -300,8 +300,8 @@ An example of what the output may look like:
 ### 📁 Project List Output
 
 ```bash
-ccu --list-projects
-# or use short form: ccu -lp
+mu --list-projects
+# or use short form: mu -lp
 ```
 
 ```
@@ -314,43 +314,36 @@ ccu --list-projects
 ## 🛠️ Requirements
 
 - **Node.js** >= 14.0.0
-- **Claude Code** installed and configured
-- At least one Claude Code project with conversation history
+- At least one AI model project with conversation history
 
 ## 📁 Data Sources
 
-This tool reads Claude Code usage data from your local files:
+This tool reads model usage data from your local files:
 
-- `~/.claude.json` - Main Claude Code configuration
-- `~/.claude/projects/` - Session records and project data
-- `~/.claude/settings.json` - User settings (optional)
+- Default: `~/.model-usage.json` and `~/.model-usage/projects/`
+- Configurable via `MODEL_USAGE_DATA_PATH` and `MODEL_USAGE_PROJECTS_PATH` env vars
 
 ## 🚨 Setup Instructions
 
-First time using this tool? If Claude Code isn't configured on your system, you'll see:
+First time using this tool? Make sure your AI tool saves conversation history locally:
 
 ```
-❌ Claude Code configuration not found!
+❌ Model usage data not found!
 
 📋 To fix this:
 
-1. Install Claude Code:
-   npm install -g @anthropic-ai/claude-code
+1. Ensure your AI tool saves conversation history locally
 
-2. Authenticate:
-   claude
-   # Follow authentication prompts
+2. Configure data source path:
+   export MODEL_USAGE_DATA_PATH=/path/to/your/data.json
 
-3. Start a conversation:
-   claude "Hello, world!"
-
-4. Run this tool:
-   ccu
+3. Run this tool:
+   mu
 ```
 
 ## 🔒 Privacy & Security
 
-- **100% Local Data** - All Claude Code usage data read from your local files
+- **100% Local Data** - All model usage data read from your local files
 - **Minimal Network Usage** - Only fetches model pricing from LiteLLM (cached for 1 hour)
 - **No API Keys** - No authentication required
 - **Privacy First** - Your usage data never leaves your machine
@@ -365,9 +358,9 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ## 🐛 Issues
 
-Found a bug? [Create an issue](https://github.com/evanlong-me/claude-code-usage/issues)
+Found a bug? [Create an issue](https://github.com/evanlong-me/model-usage/issues)
 
 ## 📚 Links
 
-- [NPM Package](https://www.npmjs.com/package/claude-code-usage)
-- [Claude Code Documentation](https://docs.anthropic.com/en/docs/claude-code/settings)
+- [NPM Package](https://www.npmjs.com/package/model-usage)
+- [GitHub Repository](https://github.com/evanlong-me/model-usage)
