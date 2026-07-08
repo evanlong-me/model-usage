@@ -45,16 +45,16 @@ mu -p <project>        # Filter by project
 mu -m <model>          # Filter by model (partial match: "sonnet", "gpt-4")
 
 # Sorting
-mu -s cost -o desc     # Sort by cost descending
-mu -s time -o asc      # Sort by time ascending (default)
+mu -k cost -o desc     # Sort by cost descending
+mu -k time -o asc      # Sort by time ascending (default)
 
 # View modes
 mu -d                  # Detailed view (individual messages)
-mu --by-date           # Aggregate by date only (combines all projects)
+mu -b                  # Aggregate by date only (combines all projects)
 
 # Lists
-mu -lp                 # List projects
-mu -lm                 # List models with pricing
+mu -P                  # List projects
+mu -M                  # List models with pricing
 
 # Combined
 mu -m sonnet -t 7d     # Last 7 days, sonnet models only

@@ -24,24 +24,24 @@ program
   .option('-t, --time <filter>', 'Examples:\n                           Relative: 30min, 2h, 7d, 1m, 1y\n                           ISO8601: 2025-01-30T16:30:15 (supports h/m/s precision)\n                           Ranges: 2025-01-30T16,2025-01-30T18 (hour)\n                                   2025-01-30T16:30,2025-01-30T18:45 (minute)\n                                   2025-01-30T16:30:15,2025-01-30T18:45:30 (second)')
   .option('-p, --project <name>', 'Project name filter (partial matching supported)')
   .option('-m, --model <name>', 'Model name filter — partial matching supported (e.g. "gpt-4", "sonnet")')
-  .option('-s, --sort <field>', 'Sort by field (cost, time, tokens, project)', 'time')
+  .option('-k, --sort <field>', 'Sort by field (cost, time, tokens, project)', 'time')
   .option('-o, --order <direction>', 'Sort order (asc, desc)', 'asc')
-  .option('-d, --detailed', 'Show detailed view with individual messages (default: aggregated by day)')
-  .option('--by-date', 'Aggregate by date only, combining all projects per day')
-  .option('-a, --all', 'Show all projects (default: auto-detect current project if in project directory)')
-  .option('-lp, --list-projects', 'List all available projects')
-  .option('-lm, --list-models', 'List all available models with pricing')
+  .option('-d, --detailed', 'Show individual messages instead of daily aggregates')
+  .option('-b, --by-date', 'Aggregate by date only (combine all projects per day)')
+  .option('-a, --all-projects', 'Show all projects (skip auto-detection)')
+  .option('-P, --projects', 'List all projects')
+  .option('-M, --models', 'List all models with pricing')
   .option('--disable-github-prompt', 'Permanently disable the GitHub star prompt')
   .option('--enable-github-prompt', 'Re-enable the GitHub star prompt')
-  .option('--sources <list>', 'TUI sources to query: comma-separated names (e.g. "pi,opencode"),\n                           "all" for all, or omit for interactive selection')
+  .option('-s, --sources <list>', 'TUI sources to query: comma-separated names (e.g. "pi,opencode"), "all" for all, or omit for interactive selection')
   .configureHelp({
     formatHelp(cmd, helper) {
       const groups = {
-        Filtering: ['time', 'project', 'model', 'all'],
+        Filtering: ['time', 'project', 'model', 'sources', 'all-projects'],
         'View modes': ['detailed', 'by-date'],
         Sorting: ['sort', 'order'],
-        Lists: ['list-projects', 'list-models'],
-        Config: ['disable-github-prompt', 'enable-github-prompt', 'sources'],
+        Lists: ['projects', 'models'],
+        Config: ['disable-github-prompt', 'enable-github-prompt'],
         Other: ['help', 'version']
       };
       const groupOf = name => {
@@ -93,10 +93,10 @@ program
       await disableGitHubPrompt();
     } else if (options.enableGithubPrompt) {
       await enableGitHubPrompt();
-    } else if (options.listProjects) {
+    } else if (options.projects) {
       const sourceNames = await resolveSources(options);
       await showProjects(sourceNames);
-    } else if (options.listModels) {
+    } else if (options.models) {
       await showModels();
     } else {
       const sourceNames = await resolveSources(options);
