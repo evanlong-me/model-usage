@@ -93,10 +93,12 @@ export async function readJsonlDir(
 
   try {
     const files = await fs.readdir(dirPath);
-    for (const file of files) {
-      if (!file.endsWith('.jsonl')) continue;
-      await processJsonlFile(path.join(dirPath, file), processLine, ctx, messages);
-    }
+    const jsonlFiles = files.filter((f) => f.endsWith('.jsonl'));
+    await Promise.all(
+      jsonlFiles.map((file) =>
+        processJsonlFile(path.join(dirPath, file), processLine, ctx, messages),
+      ),
+    );
   } catch (err) {
     console.error(`readJsonlDir error (${dirPath}):`, (err as Error).message);
   }
@@ -106,6 +108,7 @@ export async function readJsonlDir(
 
 /**
  * Read all .jsonl files recursively in a directory tree.
+ * Collects file paths first, then reads in parallel.
  */
 export async function readJsonlTree(
   dirPath: string,
@@ -120,7 +123,9 @@ export async function readJsonlTree(
     return { messages, totals: finalizeTotals(totals) };
   }
 
-  async function walk(dir: string): Promise<void> {
+  const jsonlPaths: string[] = [];
+
+  async function collect(dir: string): Promise<void> {
     try {
       const entries = await fs.readdir(dir);
       for (const entry of entries) {
@@ -128,20 +133,25 @@ export async function readJsonlTree(
         try {
           const stat = await fs.stat(fullPath);
           if (stat.isDirectory()) {
-            await walk(fullPath);
+            await collect(fullPath);
           } else if (entry.endsWith('.jsonl')) {
-            await processJsonlFile(fullPath, processLine, ctx, messages);
+            jsonlPaths.push(fullPath);
           }
         } catch (err) {
-          console.error(`walk error (${fullPath}):`, (err as Error).message);
+          console.error(`readJsonlTree: stat error (${fullPath}):`, (err as Error).message);
         }
       }
     } catch (err) {
-      console.error(`walk dir error (${dir}):`, (err as Error).message);
+      console.error(`readJsonlTree: readdir error (${dir}):`, (err as Error).message);
     }
   }
 
-  await walk(dirPath);
+  await collect(dirPath);
+
+  await Promise.all(
+    jsonlPaths.map((fp) => processJsonlFile(fp, processLine, ctx, messages)),
+  );
+
   return { messages, totals: finalizeTotals(totals) };
 }
 
@@ -203,26 +213,34 @@ export function hasUsage(data: Record<string, unknown>): boolean {
  * Lightweight — only parses JSON, doesn't construct Message objects.
  */
 export async function countMessagesInDir(dirPath: string): Promise<number> {
-  let count = 0;
-  if (!(await fs.pathExists(dirPath))) return count;
+  if (!(await fs.pathExists(dirPath))) return 0;
+
   try {
     const files = await fs.readdir(dirPath);
-    for (const file of files) {
-      if (!file.endsWith('.jsonl')) continue;
-      const filePath = path.join(dirPath, file);
-      try {
-        const content = await fs.readFile(filePath, 'utf8');
-        const lines = content.trim().split('\n').filter((l) => l.trim());
-        for (const line of lines) {
-          const data = JSON.parse(line) as Record<string, unknown>;
-          if (hasUsage(data)) count++;
+    const jsonlFiles = files.filter((f) => f.endsWith('.jsonl'));
+
+    const counts = await Promise.all(
+      jsonlFiles.map(async (file) => {
+        const filePath = path.join(dirPath, file);
+        try {
+          const content = await fs.readFile(filePath, 'utf8');
+          const lines = content.trim().split('\n').filter((l) => l.trim());
+          let c = 0;
+          for (const line of lines) {
+            const data = JSON.parse(line) as Record<string, unknown>;
+            if (hasUsage(data)) c++;
+          }
+          return c;
+        } catch (err) {
+          console.error(`countMessagesInDir: read error ${filePath}:`, (err as Error).message);
+          return 0;
         }
-      } catch (err) {
-        console.error(`countMessagesInDir: read error ${filePath}:`, (err as Error).message);
-      }
-    }
+      }),
+    );
+
+    return counts.reduce((sum, c) => sum + c, 0);
   } catch (err) {
     console.error(`countMessagesInDir error (${dirPath}):`, (err as Error).message);
+    return 0;
   }
-  return count;
 }

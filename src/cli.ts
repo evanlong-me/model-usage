@@ -33,29 +33,37 @@ program
   .option('-s, --sources <list>', 'TUI sources: comma-separated names, "all", or omit for interactive selection')
   .configureHelp({ formatHelp })
   .action(async (options: CliOptions) => {
-    await checkForUpdates();
-
     if (options.disableGithubPrompt) {
       await disableGitHubPrompt();
     } else if (options.enableGithubPrompt) {
       await enableGitHubPrompt();
-    } else if (options.projects) {
-      const sourceNames = await resolveSourceNames(options);
-      await showProjects(sourceNames);
-    } else if (options.models) {
-      await showModels();
     } else {
-      const sourceNames = await resolveSourceNames(options);
-      const projectAware = await getProjectAwareOptions(options);
-      await showUsage(projectAware, sourceNames);
+      if (options.projects) {
+        const [, sourceNames] = await Promise.all([
+          checkForUpdates(),
+          resolveSourceNames(options),
+        ]);
+        await showProjects(sourceNames);
+      } else if (options.models) {
+        await Promise.all([checkForUpdates(), showModels()]);
+      } else {
+        const [, sourceNames] = await Promise.all([
+          checkForUpdates(),
+          resolveSourceNames(options),
+        ]);
+        const projectAware = await getProjectAwareOptions(options);
+        await showUsage(projectAware, sourceNames);
+      }
     }
   });
 
 // No args → show usage by default
 if (process.argv.slice(2).length === 0) {
   (async () => {
-    await checkForUpdates();
-    const sourceNames = await resolveSourceNames({} as CliOptions);
+    const [, sourceNames] = await Promise.all([
+      checkForUpdates(),
+      resolveSourceNames({ sort: 'time', order: 'asc' }),
+    ]);
     const options: CliOptions = { sort: 'time', order: 'asc' };
     const projectAware = await getProjectAwareOptions(options);
     await showUsage(projectAware, sourceNames);

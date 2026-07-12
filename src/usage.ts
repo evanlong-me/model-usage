@@ -51,13 +51,7 @@ export async function getUsage(options: GetUsageOptions = {}): Promise<UsageResu
 }
 
 export async function getProjects(options: GetUsageOptions = {}): Promise<ProjectsResult> {
-  const result = await autoDetectProjects(options.sourceNames ?? null);
-  if (!result || result.projects.length === 0) {
-    const err = new Error(NO_DATA_MESSAGE);
-    err.name = 'DetailedError';
-    throw err;
-  }
-  return result;
+  return (await autoDetectProjects(options.sourceNames ?? null)) ?? { projects: [], messageCount: {} };
 }
 
 // ─── Auto-detection (parallel) ───────────────────────────────────

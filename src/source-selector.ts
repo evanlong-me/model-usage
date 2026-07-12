@@ -66,15 +66,17 @@ export async function selectSources(
 export async function getSourcePreviews(
   sources: { name: string; source: { getProjects: () => Promise<{ messageCount: Record<string, number> }> } }[],
 ): Promise<{ name: string; messageCount: number }[]> {
-  const previews: { name: string; messageCount: number }[] = [];
-  for (const { name, source } of sources) {
-    try {
+  const results = await Promise.allSettled(
+    sources.map(async ({ name, source }) => {
       const { messageCount } = await source.getProjects();
-      const total = Object.values(messageCount).reduce((a, b) => a + b, 0);
-      previews.push({ name, messageCount: total });
-    } catch {
-      previews.push({ name, messageCount: 0 });
-    }
-  }
-  return previews;
+      return {
+        name,
+        messageCount: Object.values(messageCount).reduce((a, b) => a + b, 0),
+      };
+    }),
+  );
+
+  return results.map((r, i) =>
+    r.status === 'fulfilled' ? r.value : { name: sources[i].name, messageCount: 0 },
+  );
 }

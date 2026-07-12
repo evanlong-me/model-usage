@@ -101,17 +101,19 @@ async function processFile(filePath: string, messages: Message[], totals: Totals
         const cacheReadD = Math.max(0, (usage.cached_input_tokens || 0) - prevTotals.cacheReadTokens);
         const reasoningD = Math.max(0, (usage.reasoning_output_tokens || 0) - prevTotals.reasoningTokens);
 
-        const msg = createMessage({
-          timestamp: data.timestamp as string,
-          project: projectName,
-          role: 'assistant',
-          inputTokens: inputD,
-          outputTokens: outputD + reasoningD,
-          cacheReadTokens: cacheReadD,
-          model: currentModel,
-        });
-        messages.push(msg);
-        accumulateTotals(totals, msg);
+        if (inputD > 0 || outputD > 0 || cacheReadD > 0 || reasoningD > 0) {
+          const msg = createMessage({
+            timestamp: data.timestamp as string,
+            project: projectName,
+            role: 'assistant',
+            inputTokens: inputD,
+            outputTokens: outputD + reasoningD,
+            cacheReadTokens: cacheReadD,
+            model: currentModel,
+          });
+          messages.push(msg);
+          accumulateTotals(totals, msg);
+        }
       }
 
       prevTotals = {

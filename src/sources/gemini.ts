@@ -109,13 +109,18 @@ function extractMessage(
   const tokens = data.tokens as GeminiTokens | undefined;
   if (!tokens) return null;
 
+  const input = tokens.input || 0;
+  const output = tokens.output || 0;
+  const cached = tokens.cached || 0;
+  if (input === 0 && output === 0 && cached === 0) return null;
+
   return createMessage({
     timestamp: (data.timestamp as string) || fallbackTimestamp,
     project: projectName,
     role: data.type as string | null,
-    inputTokens: tokens.input,
-    outputTokens: tokens.output,
-    cacheReadTokens: tokens.cached,
+    inputTokens: input,
+    outputTokens: output,
+    cacheReadTokens: cached,
     model: data.model as string | null,
   });
 }
