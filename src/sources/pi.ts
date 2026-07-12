@@ -53,14 +53,15 @@ export async function readSessions(): Promise<UsageResult> {
     try {
       const stat = await fs.stat(dirPath);
       if (!stat.isDirectory()) continue;
-    } catch {
+    } catch (err) {
+      debug(`pi: cannot stat ${dirPath}:`, (err as Error).message);
       continue;
     }
 
     const ctx: PiLineContext = { projectName: null, sessionTimestamp: null, totals };
 
-    const { messages } = await readJsonlDir(dirPath, processLine, ctx as unknown as Record<string, unknown>);
-    allMessages.push(...messages);
+    const { messages: dirMessages } = await readJsonlDir(dirPath, processLine, ctx as unknown as Record<string, unknown>);
+    allMessages.push(...dirMessages);
   }
 
   return { messages: allMessages, totals: finalizeTotals(totals) };
@@ -117,7 +118,8 @@ export async function getProjects(): Promise<ProjectsResult> {
     try {
       const stat = await fs.stat(dirPath);
       if (!stat.isDirectory()) continue;
-    } catch {
+    } catch (err) {
+      debug(`pi: cannot stat ${dirPath}:`, (err as Error).message);
       continue;
     }
 

@@ -49,7 +49,8 @@ export async function readSessions(): Promise<UsageResult> {
     try {
       const stat = await fs.stat(dirPath);
       if (!stat.isDirectory()) continue;
-    } catch {
+    } catch (err) {
+      debug(`claude: cannot stat ${dirPath}:`, (err as Error).message);
       continue;
     }
 
@@ -111,7 +112,8 @@ export async function getProjects(): Promise<ProjectsResult> {
     try {
       const stat = await fs.stat(dirPath);
       if (!stat.isDirectory()) continue;
-    } catch {
+    } catch (err) {
+      debug(`claude: cannot stat ${dirPath}:`, (err as Error).message);
       continue;
     }
 

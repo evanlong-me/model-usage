@@ -192,8 +192,8 @@ export async function findProjectName(fileDir: string): Promise<string | null> {
         continue;
       }
     }
-  } catch {
-    /* skip unreadable directory */
+  } catch (err) {
+    debug(`findProjectName error (${fileDir}):`, (err as Error).message);
   }
   return null;
 }
@@ -228,12 +228,12 @@ export async function countMessagesInDir(dirPath: string): Promise<number> {
             /* skip */
           }
         }
-      } catch {
-        /* skip */
+      } catch (err) {
+        debug(`countMessagesInDir: read error ${filePath}:`, (err as Error).message);
       }
     }
-  } catch {
-    /* skip */
+  } catch (err) {
+    debug(`countMessagesInDir error (${dirPath}):`, (err as Error).message);
   }
   return count;
 }

@@ -28,7 +28,8 @@ export function discoverSources(): SourceInfo[] {
   let files: string[];
   try {
     files = fs.readdirSync(sourcesDir);
-  } catch {
+  } catch (err) {
+    debug(`discoverSources: readdir error:`, (err as Error).message);
     _sources = [];
     return _sources;
   }

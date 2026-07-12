@@ -10,13 +10,8 @@
 import path from 'path';
 import fs from 'fs-extra';
 import { debug } from '../util';
-import {
-  createTotals,
-  finalizeTotals,
-  createMessage,
-  accumulateTotals,
-} from './common';
-import type { Source, Message, UsageResult, ProjectsResult, Totals } from '../types';
+import { createTotals, finalizeTotals, createMessage, accumulateTotals } from './common';
+import type { Source, Message, UsageResult, ProjectsResult } from '../types';
 
 const TMP_DIR = path.join(process.env.HOME!, '.gemini', 'tmp');
 
@@ -51,7 +46,8 @@ export async function readSessions(): Promise<UsageResult> {
     try {
       const stat = await fs.stat(projectDir);
       if (!stat.isDirectory()) continue;
-    } catch {
+    } catch (err) {
+      debug(`gemini: cannot stat ${projectDir}:`, (err as Error).message);
       continue;
     }
 
@@ -68,48 +64,56 @@ export async function readSessions(): Promise<UsageResult> {
         if (!file.endsWith('.json') && !file.endsWith('.jsonl')) continue;
 
         const filePath = path.join(chatsDir, file);
-
-        try {
-          if (file.endsWith('.jsonl')) {
-            const content = await fs.readFile(filePath, 'utf8');
-            const lines = content.trim().split('\n').filter((l) => l.trim());
-            for (const line of lines) {
-              try {
-                const data = JSON.parse(line) as Record<string, unknown>;
-                const msg = extractMessage(data, projectName, null);
-                if (msg) {
-                  messages.push(msg);
-                  accumulateTotals(totals, msg);
-                }
-              } catch {
-                /* skip */
-              }
-            }
-          } else {
-            const data = (await fs.readJson(filePath)) as {
-              startTime?: string;
-              messages?: Array<Record<string, unknown>>;
-            };
-            const sessionStart = data.startTime || null;
-
-            for (const entryMsg of data.messages || []) {
-              const msg = extractMessage(entryMsg, projectName, sessionStart);
-              if (msg) {
-                messages.push(msg);
-                accumulateTotals(totals, msg);
-              }
-            }
-          }
-        } catch {
-          /* skip */
-        }
+        await processChatFile(filePath, projectName, messages, totals);
       }
-    } catch {
-      /* skip */
+    } catch (err) {
+      debug(`gemini: chats error ${chatsDir}:`, (err as Error).message);
     }
   }
 
   return { messages, totals: finalizeTotals(totals) };
+}
+
+async function processChatFile(
+  filePath: string,
+  projectName: string,
+  messages: Message[],
+  totals: ReturnType<typeof createTotals>,
+): Promise<void> {
+  try {
+    if (filePath.endsWith('.jsonl')) {
+      const content = await fs.readFile(filePath, 'utf8');
+      const lines = content.trim().split('\n').filter((l) => l.trim());
+      for (const line of lines) {
+        try {
+          const data = JSON.parse(line) as Record<string, unknown>;
+          const msg = extractMessage(data, projectName, null);
+          if (msg) {
+            messages.push(msg);
+            accumulateTotals(totals, msg);
+          }
+        } catch {
+          /* skip malformed lines */
+        }
+      }
+    } else {
+      const data = (await fs.readJson(filePath)) as {
+        startTime?: string;
+        messages?: Array<Record<string, unknown>>;
+      };
+      const sessionStart = data.startTime || null;
+
+      for (const entryMsg of data.messages || []) {
+        const msg = extractMessage(entryMsg, projectName, sessionStart);
+        if (msg) {
+          messages.push(msg);
+          accumulateTotals(totals, msg);
+        }
+      }
+    }
+  } catch (err) {
+    debug(`gemini: file error ${filePath}:`, (err as Error).message);
+  }
 }
 
 function extractMessage(
@@ -147,7 +151,8 @@ export async function getProjects(): Promise<ProjectsResult> {
     try {
       const stat = await fs.stat(projectDir);
       if (!stat.isDirectory()) continue;
-    } catch {
+    } catch (err) {
+      debug(`gemini: cannot stat ${projectDir}:`, (err as Error).message);
       continue;
     }
 
@@ -155,52 +160,54 @@ export async function getProjects(): Promise<ProjectsResult> {
     if (!(await fs.pathExists(chatsDir))) continue;
 
     const projectName = `gemini:${entry.substring(0, 8)}`;
-    let count = 0;
 
     try {
       const files = await fs.readdir(chatsDir);
+      let count = 0;
 
       for (const file of files) {
         if (file === 'logs.json') continue;
         if (!file.endsWith('.json') && !file.endsWith('.jsonl')) continue;
 
-        const filePath = path.join(chatsDir, file);
-
         try {
-          if (file.endsWith('.jsonl')) {
-            const content = await fs.readFile(filePath, 'utf8');
-            const lines = content.trim().split('\n').filter((l) => l.trim());
-            for (const line of lines) {
-              try {
-                const data = JSON.parse(line) as Record<string, unknown>;
-                if (data.tokens) count++;
-              } catch {
-                /* skip */
-              }
-            }
-          } else {
-            const data = (await fs.readJson(filePath)) as {
-              messages?: Array<Record<string, unknown>>;
-            };
-            for (const msg of data.messages || []) {
-              if (msg.tokens) count++;
-            }
-          }
+          count += await countTokensInFile(path.join(chatsDir, file));
         } catch {
-          /* skip */
+          /* skip unreadable files */
         }
       }
-    } catch {
-      /* skip */
-    }
 
-    if (count > 0) {
-      projects.push(projectName);
-      messageCount[projectName] = count;
+      if (count > 0) {
+        projects.push(projectName);
+        messageCount[projectName] = count;
+      }
+    } catch (err) {
+      debug(`gemini: chats error ${chatsDir}:`, (err as Error).message);
     }
   }
 
   return { projects: projects.sort(), messageCount };
+}
+
+async function countTokensInFile(filePath: string): Promise<number> {
+  if (filePath.endsWith('.jsonl')) {
+    let count = 0;
+    const content = await fs.readFile(filePath, 'utf8');
+    const lines = content.trim().split('\n').filter((l) => l.trim());
+    for (const line of lines) {
+      try {
+        const data = JSON.parse(line) as Record<string, unknown>;
+        if (data.tokens) count++;
+      } catch {
+        /* skip */
+      }
+    }
+    return count;
+  } else {
+    const data = (await fs.readJson(filePath)) as {
+      messages?: Array<Record<string, unknown>>;
+    };
+    return (data.messages || []).filter((m) => m.tokens).length;
+  }
 }
 
 const source: Source = { name, isAvailable, readSessions, getProjects };
