@@ -1,10 +1,10 @@
 # Model Usage
 
-Zero-config CLI for analyzing AI model usage & costs across all local TUI tools — pi, Claude Code, Codex, Gemini CLI, OpenCode, and more.
+Zero-config CLI for analyzing AI model usage & costs across all local TUI tools — pi, Claude Code, Codex, Gemini CLI, OpenCode, Grok CLI, and more.
 
 ## ✨ Features
 
-- 🪄 **Zero Configuration** - Auto-detects data from pi, Claude Code, Codex, Gemini CLI, OpenCode
+- 🪄 **Zero Configuration** - Auto-detects data from pi, Claude Code, Codex, Gemini CLI, OpenCode, Grok CLI
 - 🔒 **100% Local & Secure** - No API keys required, reads local data only
 - ⚡ **Quick Analysis** - View all usage with a single `mu` command
 - 💰 **Cost Tracking** - Accurate cost calculation (pre-computed or LiteLLM pricing)
@@ -47,8 +47,9 @@ npx model-usage
 | **Codex CLI** | `~/.codex/sessions/` | gpt-5, etc. |
 | **Gemini CLI** | `~/.gemini/tmp/<hash>/chats/` | gemini-3-pro-preview, etc. |
 | **OpenCode** | `~/.local/share/opencode/opencode.db` | deepseek-v4-pro, etc. |
+| **Grok CLI** | `~/.grok/grok.db` | grok-4.3, etc. |
 
-All five are detected automatically — no config files needed.
+All six are detected automatically — no config files needed.
 
 ## 📋 Usage
 

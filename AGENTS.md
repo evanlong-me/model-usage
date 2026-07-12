@@ -70,6 +70,7 @@ mu -m haiku -p myproject --by-date  # Per-day, haiku only, specific project
 | Codex CLI | `~/.codex/sessions/` | JSONL |
 | Gemini CLI | `~/.gemini/tmp/<hash>/chats/` | JSON / JSONL |
 | OpenCode | `~/.local/share/opencode/opencode.db` | SQLite |
+| Grok CLI | `~/.grok/grok.db` | SQLite |
 
 ## Adding a New Source
 
