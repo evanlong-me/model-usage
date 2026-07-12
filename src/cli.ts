@@ -6,6 +6,7 @@ import { selectSources, getSourcePreviews } from './source-selector';
 import { getProjectAwareOptions } from './project-detector';
 import { showUsage, showProjects, showModels } from './display';
 import { disableGitHubPrompt, enableGitHubPrompt } from './github-prompt';
+import { checkForUpdates } from './update-checker';
 import type { CliOptions } from './types';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -32,6 +33,8 @@ program
   .option('-s, --sources <list>', 'TUI sources: comma-separated names, "all", or omit for interactive selection')
   .configureHelp({ formatHelp })
   .action(async (options: CliOptions) => {
+    await checkForUpdates();
+
     if (options.disableGithubPrompt) {
       await disableGitHubPrompt();
     } else if (options.enableGithubPrompt) {
@@ -51,6 +54,7 @@ program
 // No args → show usage by default
 if (process.argv.slice(2).length === 0) {
   (async () => {
+    await checkForUpdates();
     const sourceNames = await resolveSourceNames({} as CliOptions);
     const options: CliOptions = { sort: 'time', order: 'asc' };
     const projectAware = await getProjectAwareOptions(options);

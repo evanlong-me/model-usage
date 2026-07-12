@@ -8,7 +8,6 @@ import {
   aggregateMessagesByProjectAndDate,
   aggregateMessagesByDate,
 } from './aggregator';
-import { checkForUpdates } from './update-checker';
 import { showGitHubStarPrompt } from './github-prompt';
 import {
   fetchModelPricing,
@@ -19,8 +18,6 @@ import {
 import type { CliOptions, DisplayMessage } from './types';
 
 export async function showUsage(options: CliOptions, sourceNames: string[] | null): Promise<void> {
-  await checkForUpdates();
-
   try {
     const { messages } = await getUsage({ sourceNames });
 
@@ -193,8 +190,6 @@ function formatTimestamp(ts: string | null, detailed?: boolean): string {
 // ─── Projects ────────────────────────────────────────────────────
 
 export async function showProjects(sourceNames: string[] | null): Promise<void> {
-  await checkForUpdates();
-
   const spinner = createSpinner('Fetching project list...').start();
   try {
     const { projects, messageCount } = await getUsageProjects({ sourceNames });
@@ -219,8 +214,6 @@ export async function showProjects(sourceNames: string[] | null): Promise<void> 
 // ─── Models ──────────────────────────────────────────────────────
 
 export async function showModels(): Promise<void> {
-  await checkForUpdates();
-
   const spinner = createSpinner('Fetching model pricing data...').start();
   try {
     const pricingData = await fetchModelPricing();
