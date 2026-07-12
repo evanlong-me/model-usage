@@ -1,6 +1,9 @@
 # Node.js dependencies
 node_modules/
 
+# Build output
+dist/
+
 # NPM configuration (contains auth tokens)
 .npmrc
 

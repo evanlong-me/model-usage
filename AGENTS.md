@@ -5,25 +5,31 @@ Zero-config CLI for analyzing AI model usage & costs across all local TUI tools 
 ## Project Structure
 
 ```
-├── bin/cli.js              # CLI entry point
-├── lib/
-│   ├── aggregator.js       # Aggregate messages by project/date
-│   ├── filters.js          # Time and project filtering
-│   ├── sorter.js           # Sorting by cost/time/tokens/project
-│   ├── usage.js            # Read usage data (auto-detect + config)
-│   ├── pricing.js          # Fetch model pricing from LiteLLM
-│   ├── project-detector.js # Auto-detect current project
-│   ├── update-checker.js   # Check for npm updates
-│   ├── github-prompt.js    # GitHub star prompt
-│   ├── source-selector.js  # Interactive TUI source picker
-│   └── sources/            # Auto-discovered source adapters
-│       ├── index.js        # Auto-discovery (no manual imports needed)
-│       ├── common.js       # Shared utilities for all sources
-│       ├── pi.js           # pi sessions
-│       ├── claude.js       # Claude Code sessions
-│       ├── codex.js        # Codex CLI sessions
-│       ├── gemini.js       # Gemini CLI sessions
-│       └── opencode.js     # OpenCode sessions (SQLite)
+├── src/
+│   ├── cli.ts               # CLI entry point (Commander setup)
+│   ├── display.ts            # Output formatting (tables, models, projects)
+│   ├── usage.ts              # Read usage data (auto-detect + config)
+│   ├── aggregator.ts         # Aggregate messages by project/date
+│   ├── filters.ts            # Time and project filtering
+│   ├── sorter.ts             # Sorting by cost/time/tokens/project
+│   ├── pricing.ts            # Fetch model pricing from LiteLLM
+│   ├── project-detector.ts   # Auto-detect current project
+│   ├── update-checker.ts     # Check for npm updates
+│   ├── github-prompt.ts      # GitHub star prompt
+│   ├── source-selector.ts    # Interactive TUI source picker
+│   ├── util.ts               # Shared utilities
+│   ├── types.ts              # TypeScript type definitions
+│   └── sources/              # Auto-discovered source adapters
+│       ├── index.ts          # Auto-discovery (no manual imports needed)
+│       ├── common.ts         # Shared utilities for all sources
+│       ├── pi.ts             # pi sessions
+│       ├── claude.ts         # Claude Code sessions
+│       ├── codex.ts          # Codex CLI sessions
+│       ├── gemini.ts         # Gemini CLI sessions
+│       ├── opencode.ts       # OpenCode sessions (SQLite)
+│       └── grok.ts           # Grok CLI sessions (SQLite)
+├── dist/                     # Compiled output (gitignored)
+├── tsconfig.json
 └── package.json
 ```
 
@@ -74,15 +80,31 @@ mu -m haiku -p myproject --by-date  # Per-day, haiku only, specific project
 
 ## Adding a New Source
 
-Create `lib/sources/newtool.js` exporting:
+Create `src/sources/newtool.ts` with named exports:
 
-```js
-module.exports = {
-  name: 'newtool',
-  isAvailable() { /* sync check if data exists */ },
-  readSessions() { /* return { messages, totals } */ },
-  getProjects() { /* return { projects, messageCount } */ }
-};
+```ts
+export const name = 'newtool';
+
+export function isAvailable(): boolean {
+  // sync check if data exists
+}
+
+export async function readSessions(): Promise<UsageResult> {
+  // return { messages, totals }
+}
+
+export async function getProjects(): Promise<ProjectsResult> {
+  // return { projects, messageCount }
+}
+```
+
+Use shared utilities from `./common.ts`:
+
+```ts
+import {
+  createTotals, finalizeTotals, createMessage, accumulateTotals,
+  readJsonlDir, readJsonlTree, findProjectName, countMessagesInDir,
+} from './common';
 ```
 
 No other files need changes — auto-discovery picks it up automatically.
@@ -91,7 +113,11 @@ No other files need changes — auto-discovery picks it up automatically.
 
 ```bash
 npm install            # Install dependencies
-node bin/cli.js        # Run locally
+npm run build          # Compile TypeScript → dist/
+node dist/cli.js       # Run locally
+
+# Or compile + run in one step:
+npx tsc && node dist/cli.js
 ```
 
 ## Release Process
@@ -101,8 +127,16 @@ npm version patch      # Bump version (creates tag)
 git push && git push --tags  # Trigger CI publish
 ```
 
-CI triggers on `v*` tags and publishes to npm with Trusted Publishing.
+CI triggers on `v*` tags, runs `npm ci && npm run build`, and publishes to npm with Trusted Publishing. `prepublishOnly` also runs build automatically.
+
+## Debugging
+
+Set `DEBUG=mu` to see suppressed errors from source adapters:
+
+```bash
+DEBUG=mu node dist/cli.js
+```
 
 ## Pricing
 
-Model pricing is fetched dynamically from LiteLLM's pricing data. Sources with pre-computed costs (pi, OpenCode) use those directly; others (Claude Code, Codex, Gemini CLI) calculate via LiteLLM.
+Model pricing is fetched dynamically from LiteLLM's pricing data. Sources with pre-computed costs (pi, OpenCode, Grok) use those directly; others (Claude Code, Codex, Gemini CLI) calculate via LiteLLM.

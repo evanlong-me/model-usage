@@ -2,13 +2,18 @@
   "name": "model-usage",
   "version": "2.11.3",
   "description": "Zero-config CLI for analyzing AI model usage & costs across all local TUI tools — pi, Claude Code, Codex, Gemini CLI, OpenCode, and more",
-  "main": "bin/cli.js",
+  "main": "dist/cli.js",
   "bin": {
-    "model-usage": "bin/cli.js",
-    "mu": "bin/cli.js"
+    "model-usage": "dist/cli.js",
+    "mu": "dist/cli.js"
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "start": "node bin/cli.js"
+    "build": "tsc",
+    "start": "node dist/cli.js",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "ai",
@@ -49,5 +54,11 @@
   "bugs": {
     "url": "https://github.com/evanlong-me/model-usage/issues"
   },
-  "homepage": "https://github.com/evanlong-me/model-usage#readme"
+  "homepage": "https://github.com/evanlong-me/model-usage#readme",
+  "devDependencies": {
+    "@types/chalk": "^0.4.31",
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^26.1.1",
+    "typescript": "^7.0.2"
+  }
 }
