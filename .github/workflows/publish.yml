@@ -37,6 +37,9 @@ jobs:
           fi
           echo "✅ Version verified: $PKG_VERSION"
 
+      - name: Upgrade npm (needed for OIDC provenance)
+        run: npm install -g npm@11
+
       - name: Install dependencies
         run: npm ci
 
