@@ -8,7 +8,7 @@ Zero-config CLI for analyzing AI model usage & costs across all local TUI tools 
 ├── src/
 │   ├── cli.ts               # CLI entry point (Commander setup)
 │   ├── display.ts            # Output formatting (tables, models, projects)
-│   ├── usage.ts              # Read usage data (auto-detect + config)
+│   ├── usage.ts              # Read usage data (auto-detect all sources)
 │   ├── aggregator.ts         # Aggregate messages by project/date
 │   ├── filters.ts            # Time and project filtering
 │   ├── sorter.ts             # Sorting by cost/time/tokens/project
@@ -17,8 +17,9 @@ Zero-config CLI for analyzing AI model usage & costs across all local TUI tools 
 │   ├── update-checker.ts     # Check for npm updates
 │   ├── github-prompt.ts      # GitHub star prompt
 │   ├── source-selector.ts    # Interactive TUI source picker
-│   ├── util.ts               # Shared utilities
+│   ├── util.ts               # Shared utilities (path, fetch, debug)
 │   ├── types.ts              # TypeScript type definitions
+│   ├── cli-table3.d.ts       # Type declarations for cli-table3
 │   └── sources/              # Auto-discovered source adapters
 │       ├── index.ts          # Auto-discovery (no manual imports needed)
 │       ├── common.ts         # Shared utilities for all sources
@@ -147,7 +148,9 @@ npm version <major|minor|patch>
 git push --follow-tags
 ```
 
-CI triggers on `v*` tags, runs `npm ci && npm run build`, and publishes to npm with Trusted Publishing.
+CI triggers on `v*` tags: upgrades npm to 11 (required for OIDC provenance),
+runs `npm ci`, then `npm publish --provenance` (which triggers `prepublishOnly`
+→ `npm run build` → `tsc`). GitHub Release is created automatically.
 
 ### Post-release
 

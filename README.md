@@ -150,18 +150,23 @@ mu --enable-github-prompt   # Show it again
 
 ## 🧩 Extending
 
-To add support for a new TUI tool, create `lib/sources/mytool.js`:
+To add support for a new TUI tool, create `src/sources/mytool.ts`:
 
-```js
-module.exports = {
-  name: 'mytool',
-  isAvailable() { /* sync check */ },
-  readSessions() { /* return { messages, totals } */ },
-  getProjects() { /* return { projects, messageCount } */ }
-};
+```ts
+export const name = 'mytool';
+
+export function isAvailable(): boolean { /* sync check */ }
+
+export async function readSessions(): Promise<UsageResult> {
+  // return { messages, totals }
+}
+
+export async function getProjects(): Promise<ProjectsResult> {
+  // return { projects, messageCount }
+}
 ```
 
-No other files need changes — auto-discovery picks it up. See `lib/sources/common.js` for shared utilities.
+No other files need changes — auto-discovery picks it up. See `src/sources/common.ts` for shared utilities.
 
 ## 📄 License
 
