@@ -65,7 +65,7 @@ if (process.argv.slice(2).length === 0) {
 async function resolveSourceNames(options: CliOptions): Promise<string[] | null> {
   const allSources = discoverSources();
 
-  if (options.sources) {
+  if (options.sources !== undefined) {
     if (options.sources === 'all') return null;
     return options.sources.split(',').map((s) => s.trim()).filter(Boolean);
   }

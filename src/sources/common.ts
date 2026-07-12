@@ -155,9 +155,10 @@ async function processJsonlFile(
   try {
     const content = await fs.readFile(filePath, 'utf8');
     const lines = content.trim().split('\n').filter((l) => l.trim());
+    ctx.filePath = filePath;
     for (const line of lines) {
       const data = JSON.parse(line) as Record<string, unknown>;
-      const result = await processLine(data, { ...ctx, filePath });
+      const result = await processLine(data, ctx);
       if (result) {
         messages.push(result);
         accumulateTotals(ctx.totals, result);

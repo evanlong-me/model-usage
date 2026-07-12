@@ -106,8 +106,8 @@ function renderTable(messages: DisplayMessage[], options: CliOptions): void {
       console.log(chalk.gray('  • Use broader time ranges (e.g., 1m instead of 7d)'));
       console.log(chalk.gray('  • Check project name spelling'));
       console.log(chalk.gray('  • Check model name spelling (try partial match, e.g. "sonnet")'));
-      console.log(chalk.gray('  • Use --list-projects to see available projects'));
-      console.log(chalk.gray('  • Use -lm to see available models'));
+      console.log(chalk.gray('  • Use -P or --projects to see available projects'));
+      console.log(chalk.gray('  • Use -M or --models to see available models'));
     }
     return;
   }

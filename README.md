@@ -68,13 +68,13 @@ In non-interactive environments (piped, cron, etc.), all sources are auto-select
 ### Basic Commands
 
 ```bash
-mu                        # Today's usage (auto-detect project + interactive source picker)
-mu -a                     # All projects across all selected sources
-mu -v                     # Version
-mu -h                     # Help
+mu                        # All usage for auto-detected project (interactive source picker in TTY)
+mu -a, --all-projects     # All projects across all selected sources
+mu -v, --version          # Version
+mu -h, --help             # Help
 
-mu -lp                    # List all projects
-mu -lm                    # List all models with LiteLLM pricing
+mu -P, --projects         # List all projects
+mu -M, --models           # List all models with LiteLLM pricing
 ```
 
 ### 🔍 Filtering
@@ -97,10 +97,10 @@ mu -t 7d -m sonnet -p myproject
 ### 📈 Sorting
 
 ```bash
-mu -s cost -o desc        # Highest cost first
-mu -s tokens -o desc      # Most tokens first
-mu -s project -o asc      # Alphabetical by project
-mu -s time -o desc        # Newest first
+mu -k cost -o desc        # Highest cost first
+mu -k tokens -o desc      # Most tokens first
+mu -k project -o asc      # Alphabetical by project
+mu -k time -o desc        # Newest first
 ```
 
 ### 📊 View Modes

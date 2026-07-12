@@ -38,7 +38,8 @@ Zero-config CLI for analyzing AI model usage & costs across all local TUI tools 
 
 ```bash
 # Default (interactive source selection if TTY, else all sources)
-mu                     # Show today's usage (auto-detect project)
+mu                     # Show all usage for auto-detected project
+mu -a                  # Show all projects (skip auto-detection)
 
 # Source selection
 mu --sources pi,opencode  # Only query specific TUI tools
@@ -48,7 +49,7 @@ mu                        # Interactive checkbox UI to pick sources
 # Filtering
 mu -t 7d               # Last 7 days
 mu -t 2h               # Last 2 hours
-mu -p <project>        # Filter by project
+mu -p <project>        # Filter by project (partial match: "model", "obix")
 mu -m <model>          # Filter by model (partial match: "sonnet", "gpt-4")
 
 # Sorting
