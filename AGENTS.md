@@ -122,12 +122,37 @@ npx tsc && node dist/cli.js
 
 ## Release Process
 
+Releases are triggered by pushing a `v*` tag. The Agent decides the version bump.
+
+### Version bump rules
+
+Analyze the changes since the last tag and pick the appropriate bump:
+
+| Bump | When to use |
+|------|------------|
+| **major** | Breaking CLI changes, removed options, renamed flags, dropped Node version support |
+| **minor** | New feature, new source adapter, new CLI flag, significant internal refactor |
+| **patch** | Bug fixes, dependency bumps, docs-only changes, minor perf improvements |
+
+**Tie-breaking**: when in doubt, prefer the LOWER bump. A new source adapter is minor, not major. A TypeScript migration with zero CLI changes is minor (not major — users see no difference).
+
+### Release steps (Agent executes)
+
 ```bash
-npm version patch      # Bump version (creates tag)
-git push && git push --tags  # Trigger CI publish
+# 1. Review changes, decide bump type
+# 2. Bump version (creates commit + tag)
+npm version <major|minor|patch>
+
+# 3. Push code + tag → CI publishes to npm
+git push --follow-tags
 ```
 
-CI triggers on `v*` tags, runs `npm ci && npm run build`, and publishes to npm with Trusted Publishing. `prepublishOnly` also runs build automatically.
+CI triggers on `v*` tags, runs `npm ci && npm run build`, and publishes to npm with Trusted Publishing.
+
+### Post-release
+
+- Verify `npm view model-usage version` matches
+- CI also creates a GitHub Release automatically
 
 ## Debugging
 
