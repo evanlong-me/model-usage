@@ -1,5 +1,4 @@
 import chalk from 'chalk';
-import { createSpinner } from 'nanospinner';
 import { fetchJson } from './util';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -11,21 +10,15 @@ interface RegistryResponse {
 }
 
 export async function checkForUpdates(): Promise<void> {
-  const spinner = createSpinner('Checking for updates...').start();
-
   try {
     const data = await fetchJson<RegistryResponse>(NPM_REGISTRY_URL);
     const latestVersion = data['dist-tags'].latest;
 
     if (version !== latestVersion) {
-      spinner.warn({
-        text: `New version available! Run: ${chalk.bgYellow.black.bold(` npm install -g ${name} `)}`,
-      });
+      console.log(chalk.yellow(`⚠  New version available! Run: ${chalk.bgYellow.black.bold(` npm install -g ${name} `)}`));
       console.log('');
-    } else {
-      spinner.success({ text: `You're using the latest version (${version})` });
     }
   } catch {
-    spinner.stop();
+    // Silently ignore — don't block usage display for a version check failure
   }
 }
