@@ -21,7 +21,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22.22.2'
+          node-version: '22.17.0'
 
       - name: Get version from tag
         id: version
@@ -36,9 +36,6 @@ jobs:
             exit 1
           fi
           echo "✅ Version verified: $PKG_VERSION"
-
-      - name: Upgrade npm for Trusted Publishing
-        run: npm install -g npm@11
 
       - name: Install dependencies
         run: npm ci
