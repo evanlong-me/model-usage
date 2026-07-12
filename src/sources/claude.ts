@@ -9,7 +9,7 @@
  */
 import path from 'path';
 import fs from 'fs-extra';
-import { cwdToProjectName, debug } from '../util';
+import { cwdToProjectName } from '../util';
 import {
   createTotals,
   finalizeTotals,
@@ -50,7 +50,7 @@ export async function readSessions(): Promise<UsageResult> {
       const stat = await fs.stat(dirPath);
       if (!stat.isDirectory()) continue;
     } catch (err) {
-      debug(`claude: cannot stat ${dirPath}:`, (err as Error).message);
+      console.error(`claude: cannot stat ${dirPath}:`, (err as Error).message);
       continue;
     }
 
@@ -113,7 +113,7 @@ export async function getProjects(): Promise<ProjectsResult> {
       const stat = await fs.stat(dirPath);
       if (!stat.isDirectory()) continue;
     } catch (err) {
-      debug(`claude: cannot stat ${dirPath}:`, (err as Error).message);
+      console.error(`claude: cannot stat ${dirPath}:`, (err as Error).message);
       continue;
     }
 

@@ -9,7 +9,6 @@
  */
 import path from 'path';
 import fs from 'fs-extra';
-import { debug } from '../util';
 import { createTotals, finalizeTotals, createMessage, accumulateTotals } from './common';
 import type { Source, Message, UsageResult, ProjectsResult } from '../types';
 
@@ -47,7 +46,7 @@ export async function readSessions(): Promise<UsageResult> {
       const stat = await fs.stat(projectDir);
       if (!stat.isDirectory()) continue;
     } catch (err) {
-      debug(`gemini: cannot stat ${projectDir}:`, (err as Error).message);
+      console.error(`gemini: cannot stat ${projectDir}:`, (err as Error).message);
       continue;
     }
 
@@ -67,7 +66,7 @@ export async function readSessions(): Promise<UsageResult> {
         await processChatFile(filePath, projectName, messages, totals);
       }
     } catch (err) {
-      debug(`gemini: chats error ${chatsDir}:`, (err as Error).message);
+      console.error(`gemini: chats error ${chatsDir}:`, (err as Error).message);
     }
   }
 
@@ -112,7 +111,7 @@ async function processChatFile(
       }
     }
   } catch (err) {
-    debug(`gemini: file error ${filePath}:`, (err as Error).message);
+    console.error(`gemini: file error ${filePath}:`, (err as Error).message);
   }
 }
 
@@ -152,7 +151,7 @@ export async function getProjects(): Promise<ProjectsResult> {
       const stat = await fs.stat(projectDir);
       if (!stat.isDirectory()) continue;
     } catch (err) {
-      debug(`gemini: cannot stat ${projectDir}:`, (err as Error).message);
+      console.error(`gemini: cannot stat ${projectDir}:`, (err as Error).message);
       continue;
     }
 
@@ -181,7 +180,7 @@ export async function getProjects(): Promise<ProjectsResult> {
         messageCount[projectName] = count;
       }
     } catch (err) {
-      debug(`gemini: chats error ${chatsDir}:`, (err as Error).message);
+      console.error(`gemini: chats error ${chatsDir}:`, (err as Error).message);
     }
   }
 

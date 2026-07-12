@@ -9,7 +9,7 @@
 import path from 'path';
 import fs from 'fs-extra';
 import { DatabaseSync } from 'node:sqlite';
-import { cwdToProjectName, debug } from '../util';
+import { cwdToProjectName } from '../util';
 import { createTotals, finalizeTotals, createMessage, accumulateTotals } from './common';
 import type { Source, Message, UsageResult, ProjectsResult } from '../types';
 
@@ -86,7 +86,7 @@ export async function readSessions(): Promise<UsageResult> {
       accumulateTotals(totals, message);
     }
   } catch (err) {
-    debug('OpenCode readSessions error:', (err as Error).message);
+    console.error('OpenCode readSessions error:', (err as Error).message);
   }
 
   return { messages, totals: finalizeTotals(totals) };
@@ -123,7 +123,7 @@ export async function getProjects(): Promise<ProjectsResult> {
       messageCount[projectName] = (messageCount[projectName] || 0) + row.cnt;
     }
   } catch (err) {
-    debug('OpenCode getProjects error:', (err as Error).message);
+    console.error('OpenCode getProjects error:', (err as Error).message);
   }
 
   return { projects: projects.sort(), messageCount };

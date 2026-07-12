@@ -15,7 +15,6 @@
  */
 import fs from 'fs';
 import path from 'path';
-import { debug } from '../util';
 import type { Source, SourceInfo } from '../types';
 
 let _sources: SourceInfo[] | null = null;
@@ -29,7 +28,7 @@ export function discoverSources(): SourceInfo[] {
   try {
     files = fs.readdirSync(sourcesDir);
   } catch (err) {
-    debug(`discoverSources: readdir error:`, (err as Error).message);
+    console.error(`discoverSources: readdir error:`, (err as Error).message);
     _sources = [];
     return _sources;
   }
@@ -60,7 +59,7 @@ export function discoverSources(): SourceInfo[] {
         _sources.push({ name, source: mod as unknown as Source, available });
       }
     } catch (err) {
-      debug(`Failed to load source ${file}:`, (err as Error).message);
+      console.error(`Failed to load source ${file}:`, (err as Error).message);
     }
   }
 

@@ -10,7 +10,7 @@
  */
 import path from 'path';
 import fs from 'fs-extra';
-import { cwdToProjectName, debug } from '../util';
+import { cwdToProjectName } from '../util';
 import { createTotals, finalizeTotals, createMessage, accumulateTotals } from './common';
 import type { Source, Message, UsageResult, ProjectsResult, Totals } from '../types';
 
@@ -50,11 +50,11 @@ async function processTree(dirPath: string, messages: Message[], totals: Totals)
           await processFile(fullPath, messages, totals);
         }
       } catch (err) {
-        debug(`codex: stat error ${fullPath}:`, (err as Error).message);
+        console.error(`codex: stat error ${fullPath}:`, (err as Error).message);
       }
     }
   } catch (err) {
-    debug(`codex: readdir error ${dirPath}:`, (err as Error).message);
+    console.error(`codex: readdir error ${dirPath}:`, (err as Error).message);
   }
 }
 
@@ -70,7 +70,7 @@ async function processFile(filePath: string, messages: Message[], totals: Totals
   try {
     content = await fs.readFile(filePath, 'utf8');
   } catch (err) {
-    debug(`codex: read error ${filePath}:`, (err as Error).message);
+    console.error(`codex: read error ${filePath}:`, (err as Error).message);
     return;
   }
 
@@ -161,7 +161,7 @@ export async function getProjects(): Promise<ProjectsResult> {
     try {
       content = await fs.readFile(fp, 'utf8');
     } catch (err) {
-      debug(`codex: read error ${fp}:`, (err as Error).message);
+      console.error(`codex: read error ${fp}:`, (err as Error).message);
       return;
     }
 
@@ -204,11 +204,11 @@ export async function getProjects(): Promise<ProjectsResult> {
               await scanFile(fullPath);
             }
           } catch (err) {
-            debug(`codex: stat error ${fullPath}:`, (err as Error).message);
+            console.error(`codex: stat error ${fullPath}:`, (err as Error).message);
           }
         }
       } catch (err) {
-        debug(`codex: readdir error ${dir}:`, (err as Error).message);
+        console.error(`codex: readdir error ${dir}:`, (err as Error).message);
       }
     }
     await walk(SESSIONS_DIR);

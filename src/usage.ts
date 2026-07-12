@@ -1,5 +1,4 @@
 import chalk from 'chalk';
-import { debug } from './util';
 import { getAvailableSources, getSourcesByNames } from './sources';
 import { fetchModelPricing, getModelPricing, calculateCost } from './pricing';
 import { createTotals, accumulateTotals, finalizeTotals } from './sources/common';
@@ -68,14 +67,7 @@ async function autoDetect(sourceNames: string[] | null): Promise<UsageResult | n
 
   // Read all sources in parallel
   const results = await Promise.allSettled(
-    sources.map(async ({ name, source }) => {
-      try {
-        return await source.readSessions();
-      } catch (err) {
-        debug(`[${name}] readSessions failed:`, (err as Error).message);
-        throw err;
-      }
-    }),
+    sources.map(({ source }) => source.readSessions()),
   );
 
   // Merge results
@@ -110,14 +102,7 @@ async function autoDetectProjects(sourceNames: string[] | null): Promise<Project
   const sources = resolveSources(sourceNames);
 
   const results = await Promise.allSettled(
-    sources.map(async ({ name, source }) => {
-      try {
-        return await source.getProjects();
-      } catch (err) {
-        debug(`[${name}] getProjects failed:`, (err as Error).message);
-        throw err;
-      }
-    }),
+    sources.map(({ source }) => source.getProjects()),
   );
 
   const allProjects: string[] = [];

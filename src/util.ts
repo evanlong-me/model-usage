@@ -43,10 +43,3 @@ export function fetchJson<T = unknown>(url: string): Promise<T> {
     });
   });
 }
-
-/** Debug logging — enabled via DEBUG=mu environment variable */
-export function debug(...args: unknown[]): void {
-  if (process.env.DEBUG === 'mu') {
-    console.error('[mu:debug]', ...args);
-  }
-}

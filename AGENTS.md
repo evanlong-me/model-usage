@@ -17,7 +17,7 @@ Zero-config CLI for analyzing AI model usage & costs across all local TUI tools 
 │   ├── update-checker.ts     # Check for npm updates
 │   ├── github-prompt.ts      # GitHub star prompt
 │   ├── source-selector.ts    # Interactive TUI source picker
-│   ├── util.ts               # Shared utilities (path, fetch, debug)
+│   ├── util.ts               # Shared utilities (path, fetch)
 │   ├── types.ts              # TypeScript type definitions
 │   ├── cli-table3.d.ts       # Type declarations for cli-table3
 │   └── sources/              # Auto-discovered source adapters
@@ -156,14 +156,6 @@ runs `npm ci`, then `npm publish --provenance` (which triggers `prepublishOnly`
 
 - Verify `npm view model-usage version` matches
 - CI also creates a GitHub Release automatically
-
-## Debugging
-
-Set `DEBUG=mu` to see suppressed errors from source adapters:
-
-```bash
-DEBUG=mu node dist/cli.js
-```
 
 ## Pricing
 

@@ -12,7 +12,7 @@
  */
 import path from 'path';
 import fs from 'fs-extra';
-import { cwdToProjectName, debug } from '../util';
+import { cwdToProjectName } from '../util';
 import {
   createTotals,
   finalizeTotals,
@@ -54,7 +54,7 @@ export async function readSessions(): Promise<UsageResult> {
       const stat = await fs.stat(dirPath);
       if (!stat.isDirectory()) continue;
     } catch (err) {
-      debug(`pi: cannot stat ${dirPath}:`, (err as Error).message);
+      console.error(`pi: cannot stat ${dirPath}:`, (err as Error).message);
       continue;
     }
 
@@ -119,7 +119,7 @@ export async function getProjects(): Promise<ProjectsResult> {
       const stat = await fs.stat(dirPath);
       if (!stat.isDirectory()) continue;
     } catch (err) {
-      debug(`pi: cannot stat ${dirPath}:`, (err as Error).message);
+      console.error(`pi: cannot stat ${dirPath}:`, (err as Error).message);
       continue;
     }
 
@@ -135,7 +135,7 @@ export async function getProjects(): Promise<ProjectsResult> {
       });
       count = messages.length;
     } catch {
-      debug(`Failed to count messages in ${dirPath}`);
+      console.error(`Failed to count messages in ${dirPath}`);
     }
 
     if (count > 0) {

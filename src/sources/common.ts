@@ -3,7 +3,7 @@
  */
 import fs from 'fs-extra';
 import path from 'path';
-import { cwdToProjectName, debug } from '../util';
+import { cwdToProjectName } from '../util';
 import type {
   Message,
   Totals,
@@ -98,7 +98,7 @@ export async function readJsonlDir(
       await processJsonlFile(path.join(dirPath, file), processLine, ctx, messages);
     }
   } catch (err) {
-    debug(`readJsonlDir error (${dirPath}):`, (err as Error).message);
+    console.error(`readJsonlDir error (${dirPath}):`, (err as Error).message);
   }
 
   return { messages, totals: finalizeTotals(totals) };
@@ -133,11 +133,11 @@ export async function readJsonlTree(
             await processJsonlFile(fullPath, processLine, ctx, messages);
           }
         } catch (err) {
-          debug(`walk error (${fullPath}):`, (err as Error).message);
+          console.error(`walk error (${fullPath}):`, (err as Error).message);
         }
       }
     } catch (err) {
-      debug(`walk dir error (${dir}):`, (err as Error).message);
+      console.error(`walk dir error (${dir}):`, (err as Error).message);
     }
   }
 
@@ -163,12 +163,12 @@ async function processJsonlFile(
           messages.push(result);
           accumulateTotals(ctx.totals, result);
         }
-      } catch (err) {
-        debug(`JSON parse error (${filePath}):`, (err as Error).message);
+      } catch {
+        /* skip malformed lines */
       }
     }
   } catch (err) {
-    debug(`File read error (${filePath}):`, (err as Error).message);
+    console.error(`File read error (${filePath}):`, (err as Error).message);
   }
 }
 
@@ -193,7 +193,7 @@ export async function findProjectName(fileDir: string): Promise<string | null> {
       }
     }
   } catch (err) {
-    debug(`findProjectName error (${fileDir}):`, (err as Error).message);
+    console.error(`findProjectName error (${fileDir}):`, (err as Error).message);
   }
   return null;
 }
@@ -229,11 +229,11 @@ export async function countMessagesInDir(dirPath: string): Promise<number> {
           }
         }
       } catch (err) {
-        debug(`countMessagesInDir: read error ${filePath}:`, (err as Error).message);
+        console.error(`countMessagesInDir: read error ${filePath}:`, (err as Error).message);
       }
     }
   } catch (err) {
-    debug(`countMessagesInDir error (${dirPath}):`, (err as Error).message);
+    console.error(`countMessagesInDir error (${dirPath}):`, (err as Error).message);
   }
   return count;
 }
