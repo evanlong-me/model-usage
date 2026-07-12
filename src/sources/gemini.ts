@@ -9,6 +9,7 @@
  */
 import path from 'path';
 import fs from 'fs-extra';
+import chalk from 'chalk';
 import { createTotals, finalizeTotals, createMessage, accumulateTotals } from './common';
 import type { Source, Message, UsageResult, ProjectsResult } from '../types';
 
@@ -63,56 +64,41 @@ export async function readSessions(): Promise<UsageResult> {
         if (!file.endsWith('.json') && !file.endsWith('.jsonl')) continue;
 
         const filePath = path.join(chatsDir, file);
-        await processChatFile(filePath, projectName, messages, totals);
+        try {
+          if (file.endsWith('.jsonl')) {
+            const content = await fs.readFile(filePath, 'utf8');
+            const lines = content.trim().split('\n').filter(l => l.trim());
+            for (const line of lines) {
+              const data = JSON.parse(line) as Record<string, unknown>;
+              const msg = extractMessage(data, projectName, null);
+              if (msg) {
+                messages.push(msg);
+                accumulateTotals(totals, msg);
+              }
+            }
+          } else {
+            const data = await fs.readJson(filePath) as {
+              startTime?: string;
+              messages?: Array<Record<string, unknown>>;
+            };
+            for (const entryMsg of data.messages || []) {
+              const msg = extractMessage(entryMsg, projectName, data.startTime || null);
+              if (msg) {
+                messages.push(msg);
+                accumulateTotals(totals, msg);
+              }
+            }
+          }
+        } catch (err) {
+          console.error(`gemini: file error ${filePath}:`, (err as Error).message);
+        }
       }
     } catch (err) {
-      console.error(`gemini: chats error ${chatsDir}:`, (err as Error).message);
+      console.error(`gemini: readdir error ${chatsDir}:`, (err as Error).message);
     }
   }
 
   return { messages, totals: finalizeTotals(totals) };
-}
-
-async function processChatFile(
-  filePath: string,
-  projectName: string,
-  messages: Message[],
-  totals: ReturnType<typeof createTotals>,
-): Promise<void> {
-  try {
-    if (filePath.endsWith('.jsonl')) {
-      const content = await fs.readFile(filePath, 'utf8');
-      const lines = content.trim().split('\n').filter((l) => l.trim());
-      for (const line of lines) {
-        try {
-          const data = JSON.parse(line) as Record<string, unknown>;
-          const msg = extractMessage(data, projectName, null);
-          if (msg) {
-            messages.push(msg);
-            accumulateTotals(totals, msg);
-          }
-        } catch {
-          /* skip malformed lines */
-        }
-      }
-    } else {
-      const data = (await fs.readJson(filePath)) as {
-        startTime?: string;
-        messages?: Array<Record<string, unknown>>;
-      };
-      const sessionStart = data.startTime || null;
-
-      for (const entryMsg of data.messages || []) {
-        const msg = extractMessage(entryMsg, projectName, sessionStart);
-        if (msg) {
-          messages.push(msg);
-          accumulateTotals(totals, msg);
-        }
-      }
-    }
-  } catch (err) {
-    console.error(`gemini: file error ${filePath}:`, (err as Error).message);
-  }
 }
 
 function extractMessage(
@@ -170,8 +156,8 @@ export async function getProjects(): Promise<ProjectsResult> {
 
         try {
           count += await countTokensInFile(path.join(chatsDir, file));
-        } catch {
-          /* skip unreadable files */
+        } catch (err) {
+          console.error(`gemini: file error ${path.join(chatsDir, file)}:`, (err as Error).message);
         }
       }
 
@@ -180,7 +166,7 @@ export async function getProjects(): Promise<ProjectsResult> {
         messageCount[projectName] = count;
       }
     } catch (err) {
-      console.error(`gemini: chats error ${chatsDir}:`, (err as Error).message);
+      console.error(`gemini: readdir error ${chatsDir}:`, (err as Error).message);
     }
   }
 
@@ -189,23 +175,19 @@ export async function getProjects(): Promise<ProjectsResult> {
 
 async function countTokensInFile(filePath: string): Promise<number> {
   if (filePath.endsWith('.jsonl')) {
-    let count = 0;
     const content = await fs.readFile(filePath, 'utf8');
-    const lines = content.trim().split('\n').filter((l) => l.trim());
+    const lines = content.trim().split('\n').filter(l => l.trim());
+    let count = 0;
     for (const line of lines) {
-      try {
-        const data = JSON.parse(line) as Record<string, unknown>;
-        if (data.tokens) count++;
-      } catch {
-        /* skip */
-      }
+      const data = JSON.parse(line) as Record<string, unknown>;
+      if (data.tokens) count++;
     }
     return count;
   } else {
-    const data = (await fs.readJson(filePath)) as {
+    const data = await fs.readJson(filePath) as {
       messages?: Array<Record<string, unknown>>;
     };
-    return (data.messages || []).filter((m) => m.tokens).length;
+    return (data.messages || []).filter(m => m.tokens).length;
   }
 }
 

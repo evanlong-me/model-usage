@@ -156,15 +156,11 @@ async function processJsonlFile(
     const content = await fs.readFile(filePath, 'utf8');
     const lines = content.trim().split('\n').filter((l) => l.trim());
     for (const line of lines) {
-      try {
-        const data = JSON.parse(line) as Record<string, unknown>;
-        const result = await processLine(data, { ...ctx, filePath });
-        if (result) {
-          messages.push(result);
-          accumulateTotals(ctx.totals, result);
-        }
-      } catch {
-        /* skip malformed lines */
+      const data = JSON.parse(line) as Record<string, unknown>;
+      const result = await processLine(data, { ...ctx, filePath });
+      if (result) {
+        messages.push(result);
+        accumulateTotals(ctx.totals, result);
       }
     }
   } catch (err) {
@@ -182,15 +178,11 @@ export async function findProjectName(fileDir: string): Promise<string | null> {
     for (const file of files) {
       if (!file.endsWith('.jsonl')) continue;
       const filePath = path.join(fileDir, file);
-      try {
-        const content = await fs.readFile(filePath, 'utf8');
-        const firstLine = content.trim().split('\n')[0];
-        if (!firstLine) continue;
-        const data = JSON.parse(firstLine) as { cwd?: string };
-        if (data.cwd) return cwdToProjectName(data.cwd);
-      } catch {
-        continue;
-      }
+      const content = await fs.readFile(filePath, 'utf8');
+      const firstLine = content.trim().split('\n')[0];
+      if (!firstLine) continue;
+      const data = JSON.parse(firstLine) as { cwd?: string };
+      if (data.cwd) return cwdToProjectName(data.cwd);
     }
   } catch (err) {
     console.error(`findProjectName error (${fileDir}):`, (err as Error).message);
@@ -221,12 +213,8 @@ export async function countMessagesInDir(dirPath: string): Promise<number> {
         const content = await fs.readFile(filePath, 'utf8');
         const lines = content.trim().split('\n').filter((l) => l.trim());
         for (const line of lines) {
-          try {
-            const data = JSON.parse(line) as Record<string, unknown>;
-            if (hasUsage(data)) count++;
-          } catch {
-            /* skip */
-          }
+          const data = JSON.parse(line) as Record<string, unknown>;
+          if (hasUsage(data)) count++;
         }
       } catch (err) {
         console.error(`countMessagesInDir: read error ${filePath}:`, (err as Error).message);

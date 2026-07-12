@@ -80,74 +80,70 @@ async function processFile(filePath: string, messages: Message[], totals: Totals
   let prevTotals: PrevTotals | null = null;
 
   for (const line of lines) {
-    try {
-      const data = JSON.parse(line) as Record<string, unknown>;
+    const data = JSON.parse(line) as Record<string, unknown>;
 
-      if (!projectName && data.cwd) {
-        projectName = cwdToProjectName(data.cwd as string);
-      }
-      if (data.message && (data.message as Record<string, unknown>).model) {
-        currentModel = (data.message as Record<string, unknown>).model as string;
-      }
+    if (!projectName && data.cwd) {
+      projectName = cwdToProjectName(data.cwd as string);
+    }
+    if (data.message && (data.message as Record<string, unknown>).model) {
+      currentModel = (data.message as Record<string, unknown>).model as string;
+    }
 
-      // Pattern 1: token_count events (cumulative, compute delta)
-      if (data.type === 'token_count' && data.info) {
-        const info = data.info as Record<string, unknown>;
-        const usage = info.total_token_usage as Record<string, number> | undefined;
-        if (!usage) continue;
+    // Pattern 1: token_count events (cumulative, compute delta)
+    if (data.type === 'token_count' && data.info) {
+      const info = data.info as Record<string, unknown>;
+      const usage = info.total_token_usage as Record<string, number> | undefined;
+      if (!usage) continue;
 
-        if (prevTotals) {
-          const inputD = Math.max(0, (usage.input_tokens || 0) - prevTotals.inputTokens);
-          const outputD = Math.max(0, (usage.output_tokens || 0) - prevTotals.outputTokens);
-          const cacheReadD = Math.max(0, (usage.cached_input_tokens || 0) - prevTotals.cacheReadTokens);
-          const reasoningD = Math.max(0, (usage.reasoning_output_tokens || 0) - prevTotals.reasoningTokens);
+      if (prevTotals) {
+        const inputD = Math.max(0, (usage.input_tokens || 0) - prevTotals.inputTokens);
+        const outputD = Math.max(0, (usage.output_tokens || 0) - prevTotals.outputTokens);
+        const cacheReadD = Math.max(0, (usage.cached_input_tokens || 0) - prevTotals.cacheReadTokens);
+        const reasoningD = Math.max(0, (usage.reasoning_output_tokens || 0) - prevTotals.reasoningTokens);
 
-          const msg = createMessage({
-            timestamp: data.timestamp as string,
-            project: projectName,
-            role: 'assistant',
-            inputTokens: inputD,
-            outputTokens: outputD + reasoningD,
-            cacheReadTokens: cacheReadD,
-            model: currentModel,
-          });
-          messages.push(msg);
-          accumulateTotals(totals, msg);
-        }
-
-        prevTotals = {
-          inputTokens: usage.input_tokens || 0,
-          outputTokens: usage.output_tokens || 0,
-          cacheReadTokens: usage.cached_input_tokens || 0,
-          reasoningTokens: usage.reasoning_output_tokens || 0,
-        };
+        const msg = createMessage({
+          timestamp: data.timestamp as string,
+          project: projectName,
+          role: 'assistant',
+          inputTokens: inputD,
+          outputTokens: outputD + reasoningD,
+          cacheReadTokens: cacheReadD,
+          model: currentModel,
+        });
+        messages.push(msg);
+        accumulateTotals(totals, msg);
       }
 
-      // Pattern 2: message events with direct usage
-      if (data.message && (data.message as Record<string, unknown>).usage) {
-        const msg = data.message as Record<string, unknown>;
-        const usage = msg.usage as Record<string, number>;
+      prevTotals = {
+        inputTokens: usage.input_tokens || 0,
+        outputTokens: usage.output_tokens || 0,
+        cacheReadTokens: usage.cached_input_tokens || 0,
+        reasoningTokens: usage.reasoning_output_tokens || 0,
+      };
+    }
 
-        const inputTokens = usage.input_tokens || 0;
-        const outputTokens = usage.output_tokens || 0;
+    // Pattern 2: message events with direct usage
+    if (data.message && (data.message as Record<string, unknown>).usage) {
+      const msg = data.message as Record<string, unknown>;
+      const usage = msg.usage as Record<string, number>;
 
-        if (inputTokens > 0 || outputTokens > 0) {
-          const message = createMessage({
-            timestamp: data.timestamp as string,
-            project: projectName,
-            role: (msg.role as string) || 'assistant',
-            inputTokens,
-            outputTokens,
-            cacheWriteTokens: usage.cache_creation_input_tokens,
-            cacheReadTokens: usage.cache_read_input_tokens,
-            model: (msg.model as string) || currentModel,
-          });
-          messages.push(message);
-          accumulateTotals(totals, message);
-        }
+      const inputTokens = usage.input_tokens || 0;
+      const outputTokens = usage.output_tokens || 0;
+
+      if (inputTokens > 0 || outputTokens > 0) {
+        const message = createMessage({
+          timestamp: data.timestamp as string,
+          project: projectName,
+          role: (msg.role as string) || 'assistant',
+          inputTokens,
+          outputTokens,
+          cacheWriteTokens: usage.cache_creation_input_tokens,
+          cacheReadTokens: usage.cache_read_input_tokens,
+          model: (msg.model as string) || currentModel,
+        });
+        messages.push(message);
+        accumulateTotals(totals, message);
       }
-    } catch {
-      /* skip malformed JSON lines */
     }
   }
 }
@@ -170,17 +166,13 @@ export async function getProjects(): Promise<ProjectsResult> {
     let count = 0;
 
     for (const line of lines) {
-      try {
-        const data = JSON.parse(line) as Record<string, unknown>;
-        if (!pn && data.cwd) pn = cwdToProjectName(data.cwd as string);
-        if (
-          data.type === 'token_count' ||
-          (data.message && (data.message as Record<string, unknown>).usage)
-        ) {
-          count++;
-        }
-      } catch {
-        /* skip */
+      const data = JSON.parse(line) as Record<string, unknown>;
+      if (!pn && data.cwd) pn = cwdToProjectName(data.cwd as string);
+      if (
+        data.type === 'token_count' ||
+        (data.message && (data.message as Record<string, unknown>).usage)
+      ) {
+        count++;
       }
     }
 

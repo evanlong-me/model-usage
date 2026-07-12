@@ -53,7 +53,7 @@ export function discoverSources(): SourceInfo[] {
         try {
           available = (mod.isAvailable as () => boolean)();
         } catch {
-          /* leave as false */
+          // source availability check may throw
         }
 
         _sources.push({ name, source: mod as unknown as Source, available });
