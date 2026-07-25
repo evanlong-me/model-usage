@@ -94,6 +94,7 @@ mu -t lastmonth           # Previous calendar month
 mu -t thisyear            # Current calendar year
 mu -t lastyear            # Previous calendar year
 
+mu -t 2024-07-01          # A single date — that whole day
 mu -t 2024-07-01T14:30,2024-07-01T16:45  # Date range (ISO 8601)
 
 # Project & model filters (partial matching supported)

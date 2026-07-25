@@ -19,6 +19,7 @@ function endOfDay(d: Date): Date {
  *     thisyear, lastyear (week starts on Monday; hyphenated aliases like this-week work too)
  *   - Month range (current year): 7-8, july-august
  *   - Year-month range: 2024-7-2024-8
+ *   - Single date: 2024-07-01 (that whole calendar day)
  *   - Date range: 2024-07-01,2024-08-31
  *   - DateTime range: 2024-07-01T14:30:15,2024-07-01T16:45:30
  */
@@ -150,6 +151,17 @@ export function parseTimeFilter(timeFilter: string): TimeRange {
       start: new Date(parseInt(ymRange[1], 10), parseInt(ymRange[2], 10) - 1, 1),
       end: new Date(parseInt(ymRange[3], 10), parseInt(ymRange[4], 10), 0),
     };
+  }
+
+  // Single ISO date: 2024-07-01 → that whole calendar day
+  const singleDate = filter.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (singleDate) {
+    const day = new Date(
+      parseInt(singleDate[1], 10),
+      parseInt(singleDate[2], 10) - 1,
+      parseInt(singleDate[3], 10),
+    );
+    return { start: startOfDay(day), end: endOfDay(day) };
   }
 
   // ISO date range: 2024-07-01,2024-08-31

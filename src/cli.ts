@@ -104,7 +104,7 @@ function timeFilterHelp(): string {
     '  Relative: 30min, 2h, 7d, 1m, 1y',
     '  Calendar: today, yesterday, thisweek, lastweek,',
     '            thismonth, lastmonth, thisyear, lastyear',
-    '  ISO8601: 2025-01-30T16:30:15 (supports h/m/s precision)',
+    '  Single date: 2025-01-30 (that whole day)',
     '  Ranges: 2025-01-30T16,2025-01-30T18 (hour)',
     '          2025-01-30T16:30,2025-01-30T18:45 (minute)',
     '          2025-01-30T16:30:15,2025-01-30T18:45:30 (second)',
