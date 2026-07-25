@@ -1,10 +1,22 @@
 import type { Message, TimeRange, FilterOptions } from './types';
 
+/** Local midnight of the given date. */
+function startOfDay(d: Date): Date {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
+}
+
+/** Local end of the given date (23:59:59.999). */
+function endOfDay(d: Date): Date {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
+}
+
 /**
  * Parse time filter string into a start/end date range.
  *
  * Supported formats:
  *   - Relative: 5min, 2h, 7d, 1m, 1y
+ *   - Calendar keywords: today, yesterday, thisweek, lastweek, thismonth, lastmonth,
+ *     thisyear, lastyear (week starts on Monday; hyphenated aliases like this-week work too)
  *   - Month range (current year): 7-8, july-august
  *   - Year-month range: 2024-7-2024-8
  *   - Date range: 2024-07-01,2024-08-31
@@ -14,6 +26,50 @@ export function parseTimeFilter(timeFilter: string): TimeRange {
   const now = new Date();
   const currentYear = now.getFullYear();
   const filter = timeFilter.toLowerCase().replace(/\s+/g, '');
+
+  // Calendar keywords: today, thisweek, lastmonth, …
+  // Whole calendar periods, ending at 23:59:59.999 — unlike the relative filters
+  // below, which are rolling windows relative to "now". new Date(y, m, d) normalizes
+  // overflow, so day/month/year boundaries need no special casing for month lengths
+  // or leap years.
+  const currentMonth = now.getMonth();
+  const mondayOffset = (now.getDay() + 6) % 7; // Monday = 0, Sunday = 6
+  const calendarRanges: Record<string, () => TimeRange> = {
+    today: () => ({ start: startOfDay(now), end: endOfDay(now) }),
+    yesterday: () => {
+      const day = new Date(currentYear, currentMonth, now.getDate() - 1);
+      return { start: startOfDay(day), end: endOfDay(day) };
+    },
+    thisweek: () => ({
+      start: startOfDay(new Date(currentYear, currentMonth, now.getDate() - mondayOffset)),
+      end: endOfDay(new Date(currentYear, currentMonth, now.getDate() - mondayOffset + 6)),
+    }),
+    lastweek: () => ({
+      start: startOfDay(new Date(currentYear, currentMonth, now.getDate() - mondayOffset - 7)),
+      end: endOfDay(new Date(currentYear, currentMonth, now.getDate() - mondayOffset - 1)),
+    }),
+    thismonth: () => ({
+      start: new Date(currentYear, currentMonth, 1),
+      end: endOfDay(new Date(currentYear, currentMonth + 1, 0)),
+    }),
+    lastmonth: () => ({
+      start: new Date(currentYear, currentMonth - 1, 1),
+      end: endOfDay(new Date(currentYear, currentMonth, 0)),
+    }),
+    thisyear: () => ({
+      start: new Date(currentYear, 0, 1),
+      end: endOfDay(new Date(currentYear, 11, 31)),
+    }),
+    lastyear: () => ({
+      start: new Date(currentYear - 1, 0, 1),
+      end: endOfDay(new Date(currentYear - 1, 11, 31)),
+    }),
+  };
+
+  // Strip hyphens for the lookup only, so "this-week" is an alias for "thisweek"
+  // while "january-march" still falls through to the month name range below.
+  const calendarRange = calendarRanges[filter.replace(/-/g, '')];
+  if (calendarRange) return calendarRange();
 
   // Relative: 5min
   const minMatch = filter.match(/^(\d+)min$/);
@@ -137,7 +193,7 @@ export function parseTimeFilter(timeFilter: string): TimeRange {
 
   throw new Error(
     `Invalid time filter format: ${timeFilter}. Examples: 5min, 2h, 7d, 1m, 1y, ` +
-    `2024-07-01T14:30:15,2024-07-01T16:45:30`,
+    `today, yesterday, lastweek, 2024-07-01T14:30:15,2024-07-01T16:45:30`,
   );
 }
 

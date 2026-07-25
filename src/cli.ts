@@ -102,6 +102,8 @@ function timeFilterHelp(): string {
   return [
     'Examples:',
     '  Relative: 30min, 2h, 7d, 1m, 1y',
+    '  Calendar: today, yesterday, thisweek, lastweek,',
+    '            thismonth, lastmonth, thisyear, lastyear',
     '  ISO8601: 2025-01-30T16:30:15 (supports h/m/s precision)',
     '  Ranges: 2025-01-30T16,2025-01-30T18 (hour)',
     '          2025-01-30T16:30,2025-01-30T18:45 (minute)',

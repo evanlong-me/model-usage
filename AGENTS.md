@@ -47,8 +47,10 @@ mu --sources all          # Query all sources (skip selection)
 mu                        # Interactive checkbox UI to pick sources
 
 # Filtering
-mu -t 7d               # Last 7 days
+mu -t 7d               # Last 7 days (rolling, relative to "now")
 mu -t 2h               # Last 2 hours
+mu -t today            # Calendar keywords: today, yesterday, thisweek, lastweek,
+                       # thismonth, lastmonth, thisyear, lastyear (week starts Monday)
 mu -p <project>        # Filter by project (partial match: "model", "obix")
 mu -m <model>          # Filter by model (partial match: "sonnet", "gpt-4")
 
