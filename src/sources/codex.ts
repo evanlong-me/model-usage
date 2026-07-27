@@ -91,7 +91,11 @@ async function processFile(filePath: string, messages: Message[], totals: Totals
       projectName = cwdToProjectName(payload.cwd as string);
     }
 
-    if (data.type === "turn_context" && payload && payload.model) {
+    if (data.message && (data.message as Record<string, unknown>).model) {
+      currentModel = (data.message as Record<string, unknown>).model as string;
+    }
+
+    if (!currentModel && data.type === "turn_context" && payload && payload.model) {
       currentModel = payload.model as string;
     }
 
