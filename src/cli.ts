@@ -20,7 +20,7 @@ program
   .description('A CLI tool for viewing AI model usage statistics')
   .option('-t, --time <filter>', timeFilterHelp())
   .option('-p, --project <name>', 'Project name filter (partial matching supported)')
-  .option('-m, --model <name>', 'Model name filter — partial matching supported (e.g. "gpt-4", "sonnet")')
+  .option('-m, --model <name>', 'Model name filter — partial matching supported (e.g. "gpt-5", "sonnet")')
   .option('-k, --sort <field>', 'Sort by field (cost, time, tokens, project)', 'time')
   .option('-o, --order <direction>', 'Sort order (asc, desc)', 'asc')
   .option('-d, --detailed', 'Show individual messages instead of daily aggregates')
@@ -104,10 +104,10 @@ function timeFilterHelp(): string {
     '  Relative: 30min, 2h, 7d, 1m, 1y',
     '  Calendar: today, yesterday, thisweek, lastweek,',
     '            thismonth, lastmonth, thisyear, lastyear',
-    '  Single date: 2025-01-30 (that whole day)',
-    '  Ranges: 2025-01-30T16,2025-01-30T18 (hour)',
-    '          2025-01-30T16:30,2025-01-30T18:45 (minute)',
-    '          2025-01-30T16:30:15,2025-01-30T18:45:30 (second)',
+    '  Single date: 2026-01-30 (that whole day)',
+    '  Ranges: 2026-01-30T16,2026-01-30T18 (hour)',
+    '          2026-01-30T16:30,2026-01-30T18:45 (minute)',
+    '          2026-01-30T16:30:15,2026-01-30T18:45:30 (second)',
   ].join('\n                           ');
 }
 

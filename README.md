@@ -43,11 +43,11 @@ npx model-usage
 | Tool | Data Source | Known Models |
 |------|------------|-------------|
 | **pi** | `~/.pi/agent/sessions/` | deepseek-v4-pro, etc. |
-| **Claude Code** | `~/.claude/projects/` | claude-sonnet-4-5, etc. |
+| **Claude Code** | `~/.claude/projects/` | claude-sonnet-5, etc. |
 | **Codex CLI** | `~/.codex/sessions/` | gpt-5, etc. |
 | **Gemini CLI** | `~/.gemini/tmp/<hash>/chats/` | gemini-3-pro-preview, etc. |
 | **OpenCode** | `~/.local/share/opencode/opencode.db` | deepseek-v4-pro, etc. |
-| **Grok CLI** | `~/.grok/grok.db` | grok-4.3, etc. |
+| **Grok CLI** | `~/.grok/grok.db` | grok-4.5, etc. |
 
 All six are detected automatically — no config files needed.
 
@@ -94,13 +94,13 @@ mu -t lastmonth           # Previous calendar month
 mu -t thisyear            # Current calendar year
 mu -t lastyear            # Previous calendar year
 
-mu -t 2024-07-01          # A single date — that whole day
-mu -t 2024-07-01T14:30,2024-07-01T16:45  # Date range (ISO 8601)
+mu -t 2026-07-01          # A single date — that whole day
+mu -t 2026-07-01T14:30,2026-07-01T16:45  # Date range (ISO 8601)
 
 # Project & model filters (partial matching supported)
 mu -p myproject           # Projects containing "myproject"
 mu -m sonnet              # Models containing "sonnet"
-mu -m gpt-4               # Models containing "gpt-4"
+mu -m gpt-5               # Models containing "gpt-5"
 
 # Combine
 mu -t 7d -m sonnet -p myproject
@@ -140,9 +140,9 @@ mu --enable-github-prompt   # Show it again
 ┌──────────┬─────────────┬──────────┬────────┬────────┬──────────────┬────────────┬─────────────────┬──────────┬────────────┐
 │ Time     │ Project     │ Messages │ Input  │ Output │ Cache Create │ Cache Read │ Model           │ Total    │ Cost (USD) │
 ├──────────┼─────────────┼──────────┼────────┼────────┼──────────────┼────────────┼─────────────────┼──────────┼────────────┤
-│ 7/1/2026 │ my-website  │       15 │  1,200 │    400 │            0 │     20,000 │ gpt-4.1         │   21,600 │      $0.09 │
+│ 7/1/2026 │ my-website  │       15 │  1,200 │    400 │            0 │     20,000 │ gpt-5           │   21,600 │      $0.09 │
 ├──────────┼─────────────┼──────────┼────────┼────────┼──────────────┼────────────┼─────────────────┼──────────┼────────────┤
-│ 6/30/2026│ my-website  │       20 │    800 │    300 │            0 │     15,000 │ gpt-4.1         │   16,100 │      $0.06 │
+│ 6/30/2026│ my-website  │       20 │    800 │    300 │            0 │     15,000 │ gpt-5           │   16,100 │      $0.06 │
 ├──────────┼─────────────┼──────────┼────────┼────────┼──────────────┼────────────┼─────────────────┼──────────┼────────────┤
 │ TOTAL    │             │       35 │  2,000 │    700 │            0 │     35,000 │                 │   37,700 │      $0.15 │
 └──────────┴─────────────┴──────────┴────────┴────────┴──────────────┴────────────┴─────────────────┴──────────┴────────────┘

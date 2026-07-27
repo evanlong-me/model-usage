@@ -53,7 +53,7 @@ mu -t today            # Calendar keywords: today, yesterday, thisweek, lastweek
                        # thismonth, lastmonth, thisyear, lastyear (week starts Monday)
 mu -t 2026-07-25       # A single date — that whole calendar day
 mu -p <project>        # Filter by project (partial match: "model", "obix")
-mu -m <model>          # Filter by model (partial match: "sonnet", "gpt-4")
+mu -m <model>          # Filter by model (partial match: "sonnet", "gpt-5")
 
 # Sorting
 mu -k cost -o desc     # Sort by cost descending
@@ -164,3 +164,12 @@ runs `npm ci`, then `npm publish --provenance` (which triggers `prepublishOnly`
 ## Pricing
 
 Model pricing is fetched dynamically from LiteLLM's pricing data. Sources with pre-computed costs (pi, OpenCode, Grok) use those directly; others (Claude Code, Codex, Gemini CLI) calculate via LiteLLM.
+
+## Project Memory
+
+- The codebase is fully migrated to TypeScript 7 with `erasableSyntaxOnly` enabled (no enums, namespaces, or parameter properties). SQLite connections (grok/opencode) are managed with the TS `using` keyword.
+- When adding a new source adapter, keep the feature descriptions and supported-tools lists in README.md, AGENTS.md, and `src/usage.ts` in sync.
+- In `src/sources/common.ts`, `processJsonlFile` must pass the shared `ctx` object by reference — spreading it into a copy silently drops mutations made by `processLine` (e.g. `ctx.projectName`), which once caused all pi/claude messages to show project `unknown`.
+- package.json deliberately has no `main` field (CLI-only tool), and `files` is limited to `["dist"]` so devDependencies don't get packed into the npm tarball.
+- Do not add `@types/chalk` — chalk 4 ships its own types.
+- CI pins npm to 11 because npm 12 is engine-incompatible with Node 22.17.0; don't "fix" this by upgrading npm.

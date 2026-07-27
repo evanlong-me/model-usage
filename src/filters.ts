@@ -18,10 +18,10 @@ function endOfDay(d: Date): Date {
  *   - Calendar keywords: today, yesterday, thisweek, lastweek, thismonth, lastmonth,
  *     thisyear, lastyear (week starts on Monday; hyphenated aliases like this-week work too)
  *   - Month range (current year): 7-8, july-august
- *   - Year-month range: 2024-7-2024-8
- *   - Single date: 2024-07-01 (that whole calendar day)
- *   - Date range: 2024-07-01,2024-08-31
- *   - DateTime range: 2024-07-01T14:30:15,2024-07-01T16:45:30
+ *   - Year-month range: 2026-7-2026-8
+ *   - Single date: 2026-07-01 (that whole calendar day)
+ *   - Date range: 2026-07-01,2026-08-31
+ *   - DateTime range: 2026-07-01T14:30:15,2026-07-01T16:45:30
  */
 export function parseTimeFilter(timeFilter: string): TimeRange {
   const now = new Date();
@@ -144,7 +144,7 @@ export function parseTimeFilter(timeFilter: string): TimeRange {
     }
   }
 
-  // Year-month range: 2024-7-2024-8
+  // Year-month range: 2026-7-2026-8
   const ymRange = filter.match(/^(\d{4})-(\d{1,2})-(\d{4})-(\d{1,2})$/);
   if (ymRange) {
     return {
@@ -153,7 +153,7 @@ export function parseTimeFilter(timeFilter: string): TimeRange {
     };
   }
 
-  // Single ISO date: 2024-07-01 → that whole calendar day
+  // Single ISO date: 2026-07-01 → that whole calendar day
   const singleDate = filter.match(/^(\d{4})-(\d{2})-(\d{2})$/);
   if (singleDate) {
     const day = new Date(
@@ -164,7 +164,7 @@ export function parseTimeFilter(timeFilter: string): TimeRange {
     return { start: startOfDay(day), end: endOfDay(day) };
   }
 
-  // ISO date range: 2024-07-01,2024-08-31
+  // ISO date range: 2026-07-01,2026-08-31
   const dateRange = filter.match(/^(\d{4}-\d{2}-\d{2}),(\d{4}-\d{2}-\d{2})$/);
   if (dateRange) {
     return {
@@ -173,7 +173,7 @@ export function parseTimeFilter(timeFilter: string): TimeRange {
     };
   }
 
-  // DateTime with seconds: 2024-07-01T14:30:15,2024-07-01T16:45:30
+  // DateTime with seconds: 2026-07-01T14:30:15,2026-07-01T16:45:30
   const dtSecRange = filter.match(
     /^(\d{4}-\d{2}-\d{2}[t]\d{2}:\d{2}:\d{2}),(\d{4}-\d{2}-\d{2}[t]\d{2}:\d{2}:\d{2})$/i,
   );
@@ -181,7 +181,7 @@ export function parseTimeFilter(timeFilter: string): TimeRange {
     return { start: new Date(dtSecRange[1]), end: new Date(dtSecRange[2]) };
   }
 
-  // DateTime with minutes: 2024-07-01T14:30,2024-07-01T16:45
+  // DateTime with minutes: 2026-07-01T14:30,2026-07-01T16:45
   const dtMinRange = filter.match(
     /^(\d{4}-\d{2}-\d{2}[t]\d{2}:\d{2}),(\d{4}-\d{2}-\d{2}[t]\d{2}:\d{2})$/i,
   );
@@ -192,7 +192,7 @@ export function parseTimeFilter(timeFilter: string): TimeRange {
     };
   }
 
-  // DateTime with hours: 2024-07-01T14,2024-07-01T16
+  // DateTime with hours: 2026-07-01T14,2026-07-01T16
   const dtHrRange = filter.match(
     /^(\d{4}-\d{2}-\d{2}[t]\d{2}),(\d{4}-\d{2}-\d{2}[t]\d{2})$/i,
   );
@@ -205,7 +205,7 @@ export function parseTimeFilter(timeFilter: string): TimeRange {
 
   throw new Error(
     `Invalid time filter format: ${timeFilter}. Examples: 5min, 2h, 7d, 1m, 1y, ` +
-    `today, yesterday, lastweek, 2024-07-01T14:30:15,2024-07-01T16:45:30`,
+    `today, yesterday, lastweek, 2026-07-01T14:30:15,2026-07-01T16:45:30`,
   );
 }
 
