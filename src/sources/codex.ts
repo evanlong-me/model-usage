@@ -81,7 +81,7 @@ async function processFile(filePath: string, messages: Message[], totals: Totals
 
   for (const line of lines) {
     const data = JSON.parse(line) as Record<string, unknown>;
-    const payload = data.payload as Record<string, unknown>;
+    const payload = data.payload as Record<string, unknown>|undefined;
 
     if (!projectName && data.cwd) {
       projectName = cwdToProjectName(data.cwd as string);
