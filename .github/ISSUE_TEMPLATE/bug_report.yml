@@ -1,0 +1,62 @@
+name: Bug Report
+description: Report something that mu does wrong
+title: "bug: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! Please fill in the sections below.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug — what did mu do, and what did you expect instead?
+      placeholder: mu -t 7d shows projects I ran yesterday, but with 0 tokens...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: The exact command(s) you ran and the output you got (redact anything private).
+      placeholder: |
+        1. Run `mu -a -t 7d`
+        2. See output ...
+      render: bash
+    validations:
+      required: true
+
+  - type: dropdown
+    id: sources
+    attributes:
+      label: Which data sources are affected?
+      description: The TUI tools whose data is read incorrectly (select all that apply). Skip if not source-specific.
+      multiple: true
+      options:
+        - pi
+        - Claude Code
+        - Codex CLI
+        - Gemini CLI
+        - OpenCode
+        - Grok CLI
+
+  - type: input
+    id: version
+    attributes:
+      label: mu version
+      description: Output of `mu --version`
+      placeholder: "3.1.0"
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: OS and Node.js version (`node --version`)
+      placeholder: "macOS 15.5, Node v24.18.0"
+    validations:
+      required: true

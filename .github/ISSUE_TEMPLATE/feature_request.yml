@@ -1,0 +1,38 @@
+name: Feature Request
+description: Suggest a new feature or improvement for mu
+title: "feat: "
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the idea! The best feature requests explain the *problem* first, then the solution.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem are you trying to solve?
+      description: Describe your actual workflow and where mu falls short today. Real use cases beat abstract ideas.
+      placeholder: Every day I check what I did with my coding agents today, but -t 1d is a rolling 24h window, not the calendar day...
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: What should mu do? Show the command(s) you imagine running.
+      placeholder: |
+        mu -t today          # today, 00:00–23:59
+        mu -t thisweek       # Monday–Sunday
+      render: bash
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Workarounds you use today, or other designs you weighed. Optional.
+    validations:
+      required: false
