@@ -80,9 +80,21 @@ mu -M, --models           # List all models with LiteLLM pricing
 ### 🔍 Filtering
 
 ```bash
-# Time filters
+# Time filters — relative (rolling window relative to "now")
 mu -t 7d                  # Last 7 days
 mu -t 2h                  # Last 2 hours
+
+# Time filters — calendar (whole days, week starts Monday)
+mu -t today               # Today only
+mu -t yesterday           # Yesterday only
+mu -t thisweek            # Monday of this week through Sunday
+mu -t lastweek            # Previous Monday–Sunday
+mu -t thismonth           # Current calendar month
+mu -t lastmonth           # Previous calendar month
+mu -t thisyear            # Current calendar year
+mu -t lastyear            # Previous calendar year
+
+mu -t 2024-07-01          # A single date — that whole day
 mu -t 2024-07-01T14:30,2024-07-01T16:45  # Date range (ISO 8601)
 
 # Project & model filters (partial matching supported)
