@@ -44,7 +44,7 @@ npx model-usage
 |------|------------|-------------|
 | **pi** | `~/.pi/agent/sessions/` | deepseek-v4-pro, etc. |
 | **Claude Code** | `~/.claude/projects/` | claude-sonnet-5, etc. |
-| **Codex CLI** | `~/.codex/sessions/` | gpt-5, etc. |
+| **Codex CLI** | `~/.codex/sessions/`, `~/.codex/history.jsonl` | gpt-5, etc. |
 | **Gemini CLI** | `~/.gemini/tmp/<hash>/chats/` | gemini-3-pro-preview, etc. |
 | **OpenCode** | `~/.local/share/opencode/opencode.db` | deepseek-v4-pro, etc. |
 | **Grok CLI** | `~/.grok/grok.db` | grok-4.5, etc. |
@@ -59,7 +59,7 @@ Control which TUI tools to query:
 
 ```bash
 mu                        # Interactive checkbox to pick sources (in TTY)
-mu --sources pi,opencode  # Only query pi and OpenCode
+mu -s pi,opencode         # Only query pi and OpenCode (long form: --sources)
 mu --sources all          # Query all available sources (skip prompt)
 ```
 
@@ -81,10 +81,9 @@ mu -M, --models           # List all models with LiteLLM pricing
 
 ```bash
 # Time filters — relative (rolling window relative to "now")
-mu -t 7d                  # Last 7 days
-mu -t 2h                  # Last 2 hours
+mu -t 30min               # Last 30 minutes (also: 2h, 7d, 1m, 1y)
 
-# Time filters — calendar (whole days, week starts Monday)
+# Time filters — calendar (whole days, week starts Monday; this-week style aliases OK)
 mu -t today               # Today only
 mu -t yesterday           # Yesterday only
 mu -t thisweek            # Monday of this week through Sunday
@@ -93,6 +92,10 @@ mu -t thismonth           # Current calendar month
 mu -t lastmonth           # Previous calendar month
 mu -t thisyear            # Current calendar year
 mu -t lastyear            # Previous calendar year
+
+# Time filters — month ranges
+mu -t 7-8                 # July through August this year (july-august works too)
+mu -t 2025-7-2026-8       # July 2025 through August 2026
 
 mu -t 2026-07-01          # A single date — that whole day
 mu -t 2026-07-01T14:30,2026-07-01T16:45  # Date range (ISO 8601)

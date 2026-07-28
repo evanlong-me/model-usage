@@ -42,15 +42,16 @@ mu                     # Show all usage for auto-detected project
 mu -a                  # Show all projects (skip auto-detection)
 
 # Source selection
-mu --sources pi,opencode  # Only query specific TUI tools
+mu -s pi,opencode      # Only query specific TUI tools (long form: --sources)
 mu --sources all          # Query all sources (skip selection)
 mu                        # Interactive checkbox UI to pick sources
 
 # Filtering
-mu -t 7d               # Last 7 days (rolling, relative to "now")
-mu -t 2h               # Last 2 hours
+mu -t 7d               # Last 7 days (rolling, relative to "now"); also 30min, 2h, 1m, 1y
 mu -t today            # Calendar keywords: today, yesterday, thisweek, lastweek,
-                       # thismonth, lastmonth, thisyear, lastyear (week starts Monday)
+                       # thismonth, lastmonth, thisyear, lastyear (week starts Monday;
+                       # hyphenated aliases like this-week work too)
+mu -t 7-8              # Month range this year; july-august or 2025-7-2026-8 also work
 mu -t 2026-07-25       # A single date — that whole calendar day
 mu -p <project>        # Filter by project (partial match: "model", "obix")
 mu -m <model>          # Filter by model (partial match: "sonnet", "gpt-5")
@@ -78,7 +79,7 @@ mu -m haiku -p myproject --by-date  # Per-day, haiku only, specific project
 |------|------------|--------|
 | pi | `~/.pi/agent/sessions/` | JSONL |
 | Claude Code | `~/.claude/projects/` | JSONL |
-| Codex CLI | `~/.codex/sessions/` | JSONL |
+| Codex CLI | `~/.codex/sessions/`, `~/.codex/history.jsonl` | JSONL |
 | Gemini CLI | `~/.gemini/tmp/<hash>/chats/` | JSON / JSONL |
 | OpenCode | `~/.local/share/opencode/opencode.db` | SQLite |
 | Grok CLI | `~/.grok/grok.db` | SQLite |

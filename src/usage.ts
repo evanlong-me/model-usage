@@ -14,7 +14,7 @@ const NO_DATA_MESSAGE = [
   '',
   `${chalk.green('  • pi')}            ${chalk.gray('(~/.pi/agent/sessions/)')}`,
   `${chalk.green('  • Claude Code')}   ${chalk.gray('(~/.claude/projects/)')}`,
-  `${chalk.green('  • Codex CLI')}     ${chalk.gray('(~/.codex/sessions/)')}`,
+  `${chalk.green('  • Codex CLI')}     ${chalk.gray('(~/.codex/sessions/ + history.jsonl)')}`,
   `${chalk.green('  • Gemini CLI')}    ${chalk.gray('(~/.gemini/tmp/)')}`,
   `${chalk.green('  • OpenCode')}      ${chalk.gray('(~/.local/share/opencode/opencode.db)')}`,
   `${chalk.green('  • Grok CLI')}      ${chalk.gray('(~/.grok/grok.db)')}`,
