@@ -4,9 +4,10 @@
  * Data: ~/.codex/sessions/ (rollouts, JSONL)
  *       ~/.codex/history.jsonl (consolidated history)
  *
- * Two event patterns:
+ * Three event patterns:
  *   1. token_count events with CUMULATIVE running totals → compute delta
  *   2. message events with direct usage (newer versions)
+ *   3. event_msg-wrapped token_count events (payload based, cumulative)
  */
 import path from 'path';
 import fs from 'fs-extra';
@@ -81,7 +82,7 @@ async function processFile(filePath: string, messages: Message[], totals: Totals
 
   for (const line of lines) {
     const data = JSON.parse(line) as Record<string, unknown>;
-    const payload = data.payload as Record<string, unknown>|undefined;
+    const payload = data.payload as Record<string, unknown> | undefined;
 
     if (!projectName && data.cwd) {
       projectName = cwdToProjectName(data.cwd as string);
@@ -95,7 +96,7 @@ async function processFile(filePath: string, messages: Message[], totals: Totals
       currentModel = (data.message as Record<string, unknown>).model as string;
     }
 
-    if (!currentModel && data.type === "turn_context" && payload && payload.model) {
+    if (data.type === 'turn_context' && payload && payload.model) {
       currentModel = payload.model as string;
     }
 
@@ -158,9 +159,9 @@ async function processFile(filePath: string, messages: Message[], totals: Totals
       }
     }
 
-    // Pattern 3: payload based history
-    if (data.type === 'event_msg' && payload && payload.type === "token_count") {
-      const info = payload.info as Record<string, unknown>;
+    // Pattern 3: event_msg-wrapped token_count events (payload based, cumulative)
+    if (data.type === 'event_msg' && payload && payload.type === 'token_count') {
+      const info = payload.info as Record<string, unknown> | undefined;
       if (!info) continue;
 
       const usage = info.total_token_usage as Record<string, number> | undefined;
@@ -174,7 +175,7 @@ async function processFile(filePath: string, messages: Message[], totals: Totals
 
         if (inputD > 0 || outputD > 0 || cacheReadD > 0 || reasoningD > 0) {
           const msg = createMessage({
-            timestamp: payload.timestamp as string,
+            timestamp: data.timestamp as string,
             project: projectName,
             role: 'assistant',
             inputTokens: inputD,
@@ -216,9 +217,14 @@ export async function getProjects(): Promise<ProjectsResult> {
 
     for (const line of lines) {
       const data = JSON.parse(line) as Record<string, unknown>;
+      const payload = data.payload as Record<string, unknown> | undefined;
       if (!pn && data.cwd) pn = cwdToProjectName(data.cwd as string);
+      if (!pn && data.type === 'turn_context' && payload && payload.cwd) {
+        pn = cwdToProjectName(payload.cwd as string);
+      }
       if (
         data.type === 'token_count' ||
+        (data.type === 'event_msg' && payload && payload.type === 'token_count') ||
         (data.message && (data.message as Record<string, unknown>).usage)
       ) {
         count++;
