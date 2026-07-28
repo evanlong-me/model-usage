@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      packages: write
       id-token: write
 
     steps:
@@ -45,6 +46,31 @@ jobs:
 
       - name: Publish to npm
         run: npm publish --provenance --access public
+
+      - name: Setup Node.js for GitHub Packages
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.17.0'
+          registry-url: 'https://npm.pkg.github.com'
+
+      - name: Configure package for GitHub Packages
+        run: |
+          cp package.json package.json.backup
+          node -e "
+            const pkg = require('./package.json');
+            pkg.name = '@evanlong-me/model-usage';
+            pkg.publishConfig = { registry: 'https://npm.pkg.github.com' };
+            require('fs').writeFileSync('package.json', JSON.stringify(pkg, null, 2));
+          "
+
+      - name: Publish to GitHub Packages
+        run: npm publish --registry=https://npm.pkg.github.com
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Restore original package.json
+        if: always()
+        run: mv package.json.backup package.json
 
       - name: Generate changelog
         id: changelog

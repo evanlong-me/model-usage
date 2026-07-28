@@ -155,7 +155,10 @@ git push --follow-tags
 
 CI triggers on `v*` tags: upgrades npm to 11 (required for OIDC provenance),
 runs `npm ci`, then `npm publish --provenance` (which triggers `prepublishOnly`
-→ `npm run build` → `tsc`). GitHub Release is created automatically.
+→ `npm run build` → `tsc`). It then renames the package to
+`@evanlong-me/model-usage` and publishes the same version to GitHub Packages
+(so the repo sidebar shows the package), restoring `package.json` afterwards.
+GitHub Release is created automatically.
 
 ### Post-release
 
