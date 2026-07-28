@@ -4,9 +4,10 @@
  * Data: ~/.codex/sessions/ (rollouts, JSONL)
  *       ~/.codex/history.jsonl (consolidated history)
  *
- * Two event patterns:
+ * Three event patterns:
  *   1. token_count events with CUMULATIVE running totals → compute delta
  *   2. message events with direct usage (newer versions)
+ *   3. event_msg-wrapped token_count events (payload based, cumulative)
  */
 import path from 'path';
 import fs from 'fs-extra';
@@ -81,12 +82,22 @@ async function processFile(filePath: string, messages: Message[], totals: Totals
 
   for (const line of lines) {
     const data = JSON.parse(line) as Record<string, unknown>;
+    const payload = data.payload as Record<string, unknown> | undefined;
 
     if (!projectName && data.cwd) {
       projectName = cwdToProjectName(data.cwd as string);
     }
+
+    if (!projectName && data.type === 'turn_context' && payload && payload.cwd) {
+      projectName = cwdToProjectName(payload.cwd as string);
+    }
+
     if (data.message && (data.message as Record<string, unknown>).model) {
       currentModel = (data.message as Record<string, unknown>).model as string;
+    }
+
+    if (data.type === 'turn_context' && payload && payload.model) {
+      currentModel = payload.model as string;
     }
 
     // Pattern 1: token_count events (cumulative, compute delta)
@@ -147,6 +158,43 @@ async function processFile(filePath: string, messages: Message[], totals: Totals
         accumulateTotals(totals, message);
       }
     }
+
+    // Pattern 3: event_msg-wrapped token_count events (payload based, cumulative)
+    if (data.type === 'event_msg' && payload && payload.type === 'token_count') {
+      const info = payload.info as Record<string, unknown> | undefined;
+      if (!info) continue;
+
+      const usage = info.total_token_usage as Record<string, number> | undefined;
+      if (!usage) continue;
+
+      if (prevTotals) {
+        const inputD = Math.max(0, (usage.input_tokens || 0) - prevTotals.inputTokens);
+        const outputD = Math.max(0, (usage.output_tokens || 0) - prevTotals.outputTokens);
+        const cacheReadD = Math.max(0, (usage.cached_input_tokens || 0) - prevTotals.cacheReadTokens);
+        const reasoningD = Math.max(0, (usage.reasoning_output_tokens || 0) - prevTotals.reasoningTokens);
+
+        if (inputD > 0 || outputD > 0 || cacheReadD > 0 || reasoningD > 0) {
+          const msg = createMessage({
+            timestamp: data.timestamp as string,
+            project: projectName,
+            role: 'assistant',
+            inputTokens: inputD,
+            outputTokens: outputD + reasoningD,
+            cacheReadTokens: cacheReadD,
+            model: currentModel,
+          });
+          messages.push(msg);
+          accumulateTotals(totals, msg);
+        }
+      }
+
+      prevTotals = {
+        inputTokens: usage.input_tokens || 0,
+        outputTokens: usage.output_tokens || 0,
+        cacheReadTokens: usage.cached_input_tokens || 0,
+        reasoningTokens: usage.reasoning_output_tokens || 0,
+      };
+    }
   }
 }
 
@@ -169,9 +217,14 @@ export async function getProjects(): Promise<ProjectsResult> {
 
     for (const line of lines) {
       const data = JSON.parse(line) as Record<string, unknown>;
+      const payload = data.payload as Record<string, unknown> | undefined;
       if (!pn && data.cwd) pn = cwdToProjectName(data.cwd as string);
+      if (!pn && data.type === 'turn_context' && payload && payload.cwd) {
+        pn = cwdToProjectName(payload.cwd as string);
+      }
       if (
         data.type === 'token_count' ||
+        (data.type === 'event_msg' && payload && payload.type === 'token_count') ||
         (data.message && (data.message as Record<string, unknown>).usage)
       ) {
         count++;
