@@ -73,7 +73,8 @@ async function autoDetect(sourceNames: string[] | null): Promise<UsageResult | n
     if (r.status === 'rejected') continue;
 
     const { messages, totals } = r.value;
-    allMessages.push(...messages);
+    // no spread: RangeError past ~100k args
+    for (const m of messages) allMessages.push(m);
     combinedTotals.messageCount += totals.messageCount;
     combinedTotals.inputTokens += totals.inputTokens;
     combinedTotals.outputTokens += totals.outputTokens;

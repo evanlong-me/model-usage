@@ -61,7 +61,8 @@ export async function readSessions(): Promise<UsageResult> {
     const ctx: ClaudeContext = { projectName: null, totals };
 
     const { messages } = await readJsonlDir(fileDir, processLine, ctx as unknown as Record<string, unknown>);
-    allMessages.push(...messages);
+    // no spread: RangeError past ~100k args
+    for (const m of messages) allMessages.push(m);
   }
 
   return { messages: allMessages, totals: finalizeTotals(totals) };
