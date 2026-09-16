@@ -61,7 +61,8 @@ export async function readSessions(): Promise<UsageResult> {
     const ctx: PiLineContext = { projectName: null, sessionTimestamp: null, totals };
 
     const { messages: dirMessages } = await readJsonlDir(dirPath, processLine, ctx as unknown as Record<string, unknown>);
-    allMessages.push(...dirMessages);
+    // no spread: RangeError past ~100k args
+    for (const m of dirMessages) allMessages.push(m);
   }
 
   return { messages: allMessages, totals: finalizeTotals(totals) };
